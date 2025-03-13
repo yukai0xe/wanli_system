@@ -1,14 +1,8 @@
-import Image, { StaticImageData } from 'next/image';
+import Image from 'next/image';
 import Image1 from '@/assets/images/1.jpg';
 import Image2 from '@/assets/images/2.jpg';
 import Image3 from '@/assets/images/3.jpg';
 import { Flag } from '@/app/components/decorate/flag';
-
-type activityType = {
-    "cover": string | StaticImageData;
-    "alt": string;
-    "description": string;
-}
 
 const quickLinks = [
     { title: '首頁', url: '/' },
@@ -20,7 +14,7 @@ const quickLinks = [
 const titles = ["逢甲萬里登山社", "其他連結", "近期活動"]
 const about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum. Excepteur sint occaecat cupidatat non"
 
-const activities: activityType[] = [
+const activities: FooterActivityType[] = [
     {"cover": Image1, "alt": "", "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum. Excepteur sint occaecat cupidatat non"},
     {"cover": Image2, "alt": "", "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum. Excepteur sint occaecat cupidatat non"},
     {"cover": Image3, "alt": "", "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum. Excepteur sint occaecat cupidatat non"},

@@ -32,14 +32,11 @@ const Flag = () => {
     );
 }
 
-type FlagBarType = {
-    h: number;
-    w: number;
-}
-
-
 const FlagBackground = ({size}: {size: number}) => {
-    const [flagbars, setFlagBars] = useState<FlagBarType[]>([{h: 0, w: 0}]);
+    const [flagbars, setFlagBars] = useState<{
+            h: number;
+            w: number;
+        }[]>([{h: 0, w: 0}]);
 
     useEffect(() => {
         const fl = [];

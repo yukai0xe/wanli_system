@@ -1,12 +1,5 @@
-import Image, { StaticImageData } from 'next/image';
+import Image from 'next/image';
 import styles from "./style.module.css";
-
-type CardType = {
-    id: number;
-    src: string | StaticImageData;
-    title: string;
-    description: string;
-}
 
 const Card = ({data}: {data: CardType}) => {
     return (

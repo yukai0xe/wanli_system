@@ -1,11 +1,9 @@
 import Image, { StaticImageData } from 'next/image';
 
-type ImageCornerProps = {
+const ImageCorner = ({ source }: {
     source: string | StaticImageData;
-    alt: string;
-}
-
-const ImageCorner = ({source}: ImageCornerProps) => {
+    alt: string
+}) => {
     return (
         <div className='relative'>
             <div

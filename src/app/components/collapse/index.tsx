@@ -2,12 +2,11 @@
 import { ReactNode, useState } from 'react';
 import styles from './style.module.css';
 
-type CollapseProps = {
-    title: string;
-    id: number;
-};
 
-const Collapse = ({ children, props }: { children: ReactNode, props: CollapseProps }) => {
+const Collapse = ({ children, props }: { children: ReactNode, props: {
+        title: string;
+        id: number;
+    }}) => {
     const [active, setActive] = useState(false);
 
     return (

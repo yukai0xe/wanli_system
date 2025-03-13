@@ -12,6 +12,7 @@ import Card from '@/app/components/card';
 import Image from 'next/image'
 import { Background1 } from "@/app/components/background";
 import localFont from 'next/font/local'
+import { use, useState } from "react";
 
 const myFont = localFont({ src: './fonts/QIJIC-Regular.ttf', weight: '100' });
 const myFont2 = localFont({ src: './fonts/SeoulHangang-CEB-Regular.ttf', weight: '300' });
@@ -84,26 +85,18 @@ const AboutView = () => {
 
 const TeamView = () => {
 
-  const data = [
-    {
-      id: 1,
-      title: "隊伍1",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
-      src: Image1
-    },
-    {
-      id: 2,
-      title: "隊伍2",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
-      src: Image1
-    },
-    {
-      id: 3,
-      title: "隊伍3",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
-      src: Image1
-    }
-  ]
+  const [teams, setTeams] = useState<CardType[]>([{
+    id: 1,
+    title: "Team 1",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
+    src: Image1
+  },
+  {
+    id: 2,
+    title: "Team 2",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
+    src: Image1
+  }]);
 
   const router = useRouter();
 
@@ -120,7 +113,7 @@ const TeamView = () => {
     >
       <Subtitle title="隊伍回顧" />
       <div className="flex justify-center gap-8 flex-wrap mt-10">
-        {data.map((item, index) => (
+        {teams.map((item, index) => (
           <Card key={index} data={item} />
         ))}
       </div>

@@ -1,20 +1,10 @@
 'use client';
-import Image, { StaticImageData } from "next/image"
+import Image from "next/image"
 import Image1 from "@/assets/images/2.jpg"
 import { Button1 } from "@/app/components/button"
 import { useRouter } from "next/navigation"
 
-type TeamType = {
-    id: string;
-    name: string;
-    tags: string[];
-    content: string;
-    date: Date;
-    count: number;
-    image: string | StaticImageData;
-}
-
-const teams: TeamType[] = [
+const teams: team.TeamType[] = [
     {
         id: "1",
         name: "Team 1",
@@ -35,7 +25,7 @@ const teams: TeamType[] = [
     }
 ]
 
-const TeamView = ({ team }: { team: TeamType }) => {
+const TeamView = ({ team }: { team: team.TeamType }) => {
     const date = team.date.getFullYear() + "/" + (team.date.getMonth() < 10 && "0") + (team.date.getMonth() + 1) + "/" + (team.date.getMonth() < 10 && "0") + team.date.getDate();
 
     const router = useRouter();
