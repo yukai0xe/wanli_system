@@ -4,6 +4,7 @@ import Carousel from "@/app/components/carousel";
 import { Button2 } from "@/app/components/button";
 import ImageCorner from "@/app/components/decorate/corner";
 import Image1 from "@/assets/images/1.jpg";
+import Image2 from "@/assets/images/2.jpg";
 import Logo from "@/assets/logo2.png";
 import { useRouter } from "next/navigation";
 import Subtitle from "./components/subtitle";
@@ -12,7 +13,7 @@ import Card from '@/app/components/card';
 import Image from 'next/image'
 import { Background1 } from "@/app/components/background";
 import localFont from 'next/font/local'
-import { use, useState } from "react";
+import { useState } from "react";
 
 const myFont = localFont({ src: './fonts/QIJIC-Regular.ttf', weight: '100' });
 const myFont2 = localFont({ src: './fonts/SeoulHangang-CEB-Regular.ttf', weight: '300' });
@@ -61,11 +62,7 @@ const AboutView = () => {
         boxShadow: '0 -50px 0 0 var(--secondary-color), 0 8px 2px rgba(52, 52, 52, 0.3)',
       }}
     >
-      <div className="w-1/3 flex flex-col gap-4 justify-between h-4/5"
-        style={{
-          transform: "translateY(70px)",
-        }}
-      >
+      <div className="w-1/3 flex flex-col gap-4 justify-between h-4/5">
         <div className="flex flex-col gap-4">
           <h2 className={myFont2.className} style={{fontSize: '2rem'}}>{about.title}</h2>
           <p>{about.summary}</p>
@@ -73,7 +70,8 @@ const AboutView = () => {
         <Button2 name="了解更多" handleClick={toAbout} style={{
           width: '200px',
           marginTop: 'auto',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          transform: 'scale(0.9)'
         }} />
       </div>
       <ImageCorner source={Image1} alt="" />
@@ -89,13 +87,19 @@ const TeamView = () => {
     id: 1,
     title: "Team 1",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
-    src: Image1
+    src: Image2
   },
   {
     id: 2,
     title: "Team 2",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
-    src: Image1
+    src: Image2
+    },
+  {
+    id: 3,
+    title: "Team 3",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
+    src: Image2
   }]);
 
   const router = useRouter();
@@ -119,13 +123,17 @@ const TeamView = () => {
       </div>
       <Button2 name="更多隊伍" handleClick={toTeam}/>
       <div className="w-full relative h-48">
-        <Background1 style={{
-          position: "absolute",
-          zIndex: -1,
-          bottom: 0,
-          right: 0,
-          filter: 'drop-shadow(0px 18px 6px rgb(52, 52, 52, 0.7))'
-        }} />
+        <Image src="/background.svg" alt="" width={100} height={100}
+          style={{
+            width: "100%",
+            position: "absolute",
+            zIndex: -1,
+            bottom: 0,
+            right: 0,
+            transform: 'scale(1.05)',
+            filter: 'drop-shadow(0px 18px 6px rgb(52, 52, 52, 0.7))'
+          }}
+        />
         <FlagSkew skew={10} size={7} style={{bottom: 0, right: 0, zIndex: -2 }} />
         <FlagSkew skew={-10} size={7} style={{bottom: 0, right: 0, zIndex: -2}} />
       </div>

@@ -3,6 +3,7 @@ import Image1 from '@/assets/images/1.jpg';
 import Image2 from '@/assets/images/2.jpg';
 import Image3 from '@/assets/images/3.jpg';
 import { Flag } from '@/app/components/decorate/flag';
+import Link from 'next/link';
 
 const quickLinks = [
     { title: '首頁', url: '/' },
@@ -37,9 +38,9 @@ const Footer = () => {
                     <div className='w-1/5 flex flex-col gap-8'>
                         {
                             quickLinks.map(({ title, url }) => (
-                                <a key={`${title}${url}`} href={url} className='text-xl font-bold'>
-                                    { "> " } {title}
-                                </a>
+                                <p key={`${title}${url}`} className='text-xl font-bold'>
+                                    <Link href={url}>{ "> " } {title}</Link>
+                                </p>
                             ))
                         }
                     </div>

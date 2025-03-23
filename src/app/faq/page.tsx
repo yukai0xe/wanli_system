@@ -10,7 +10,7 @@ const data = [
 const Faq = () => {
     return (
         <>
-            <div className='w-2/3'>
+            <div className='w-2/3 mb-10'>
                 {data.map((item) => (
                     <Collapse key={item.id} props={item}>
                         <p className='py-5'>{item.content}</p>

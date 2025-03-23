@@ -28,7 +28,7 @@ const Button2 = ({ name, style, handleClick }: {
     return (
         <button
             className={`${button2_styles.button} ${button2_styles.default}`}
-            style={{fontWeight: 'bold', fontSize: '1.5rem', width: '200px', marginTop: 'auto', ...style }}
+            style={{fontWeight: 'bold', fontSize: '1.3rem', width: '200px', marginTop: 'auto', ...style }}
             onClick={handleClick}
         >
             {name}

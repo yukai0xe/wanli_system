@@ -6,4 +6,11 @@
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     margin: 20px;
+    transition: .5s ease-in-out;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-20px);
+    box-shadow: 0 20px 10px rgba(0, 0, 0, 0.2);
 }
