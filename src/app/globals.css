@@ -34,6 +34,7 @@
 }
 
 body {
+  overflow-x: hidden;
   color: var(--black);
   background: var(--background);
   font-family: 'LXGWWenKaiTC-Bold', Arial, Helvetica, sans-serif;

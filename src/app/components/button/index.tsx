@@ -4,7 +4,7 @@ import button2_styles from './button2.module.css';
 const Button1 = ({ name, style, handleClick }: {
     name: string,
     style?: React.CSSProperties,
-    handleClick: () => void
+    handleClick?: () => void
 }) => {
     return (
         <button
@@ -23,7 +23,7 @@ const Button1 = ({ name, style, handleClick }: {
 const Button2 = ({ name, style, handleClick }: {
     name: string,
     style?: React.CSSProperties,
-    handleClick: () => void
+    handleClick?: () => void
 }) => {
     return (
         <button

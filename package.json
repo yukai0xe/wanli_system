@@ -2,11 +2,13 @@
   "name": "wanli-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node ./prisma/seeder/seeder.js"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
@@ -28,7 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
     "postcss": "^8",
-    "prisma": "^6.3.1",
+    "prisma": "^6.5.0",
     "supabase": "^2.12.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"

@@ -1,9 +1,7 @@
 'use server';
-import { PrismaClient } from '@prisma/client';
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient();
-
-export default async function addNewTeam(formData: FormData) {
+async function addNewTeam(formData: FormData) {
     const teamName = formData.get("username") as string;
 
     try {
@@ -28,3 +26,5 @@ export default async function addNewTeam(formData: FormData) {
         console.error(error);
     }
 }
+
+export { addNewTeam };

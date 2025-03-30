@@ -1,22 +1,20 @@
 'use client';
-import {FlagBackground, FlagSkew } from "@/app/components/decorate/flag";
-import Carousel from "@/app/components/carousel";
+import { FlagBackground, FlagSkew } from "@/app/components/decorate/flag";
+import WCarousel from "@/app/components/carousel";
 import { Button2 } from "@/app/components/button";
 import ImageCorner from "@/app/components/decorate/corner";
-import Image1 from "@/assets/images/1.jpg";
-import Image2 from "@/assets/images/2.jpg";
+import Default from "@/assets/images/1.jpg";
 import Logo from "@/assets/logo2.png";
-import { useRouter } from "next/navigation";
 import Subtitle from "./components/subtitle";
 import Collapse from '@/app/components/collapse';
 import Card from '@/app/components/card';
 import Image from 'next/image'
-import { Background1 } from "@/app/components/background";
 import localFont from 'next/font/local'
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const myFont = localFont({ src: './fonts/QIJIC-Regular.ttf', weight: '100' });
-const myFont2 = localFont({ src: './fonts/SeoulHangang-CEB-Regular.ttf', weight: '300' });
+const myFont2 = localFont({ src: './fonts/SeoulHangang-CEB-Regular.ttf', weight: '300' });  
 
 const SlogonView = () => {
   return (
@@ -45,12 +43,6 @@ const AboutView = () => {
     summary: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus egetLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus egetLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget"
   }
 
-  const router = useRouter();
-
-  const toAbout = () => {
-    router.push("/about");
-  }
-
   return (
     <section
       className="relative w-full flex justify-center items-center gap-8 py-1 mt-10 h-96"
@@ -67,14 +59,16 @@ const AboutView = () => {
           <h2 className={myFont2.className} style={{fontSize: '2rem'}}>{about.title}</h2>
           <p>{about.summary}</p>
         </div>
-        <Button2 name="了解更多" handleClick={toAbout} style={{
-          width: '200px',
-          marginTop: 'auto',
-          fontWeight: 'bold',
-          transform: 'scale(0.9)'
-        }} />
+        <Link href="/about">
+          <Button2 name="了解更多" style={{
+            width: '200px',
+            marginTop: 'auto',
+            fontWeight: 'bold',
+            transform: 'scale(0.9)'
+          }} />
+        </Link>
       </div>
-      <ImageCorner source={Image1} alt="" />
+      <ImageCorner source={Default} alt="" />
       <FlagSkew skew={10} size={7} style={{ bottom: 0, right: 0, zIndex: -1 }} />
       <FlagSkew skew={-10} size={7} style={{bottom: 0, right: 0, zIndex: -1}} />
     </section>
@@ -82,32 +76,22 @@ const AboutView = () => {
 }
 
 const TeamView = () => {
-
-  const [teams, setTeams] = useState<CardType[]>([{
-    id: 1,
-    title: "Team 1",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
-    src: Image2
-  },
-  {
-    id: 2,
-    title: "Team 2",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
-    src: Image2
-    },
-  {
-    id: 3,
-    title: "Team 3",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultriciesLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut purus eget sapien fermentum tincidunt. Nullam nec nunc nec nunc ultricies",
-    src: Image2
-  }]);
-
-  const router = useRouter();
-
-  const toTeam = () => {
-    router.push("/team");
-  }
-
+  const [teams, setTeams] = useState<CardType[]>([]);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('/api/teams');
+      const data = await res.json();
+      const teams = data.map((team: TeamSchema) => ({
+        id: team.id,
+        title: team.name,
+        description: team.content,
+        src: '/' + team.image || Default
+      }));
+      setTeams(teams.slice(0, 3));
+    }
+    fetchData();
+  }, []);
 
   return (
     <section className="relative w-full flex flex-col items-center gap-8"
@@ -118,10 +102,12 @@ const TeamView = () => {
       <Subtitle title="隊伍回顧" />
       <div className="flex justify-center gap-8 flex-wrap mt-10">
         {teams.map((item, index) => (
-          <Card key={index} data={item} />
+          <Card key={index} data={item}/>
         ))}
       </div>
-      <Button2 name="更多隊伍" handleClick={toTeam}/>
+      <Link href="/team">
+        <Button2 name="更多隊伍"/>
+      </Link>
       <div className="w-full relative h-48">
         <Image src="/background.svg" alt="" width={100} height={100}
           style={{
@@ -142,30 +128,34 @@ const TeamView = () => {
 }
 
 const FAQView = () => {
-  const data = [
-    { id: 1, title: "What is the purpose of this website?", content: "This website is a template for a Next.js app with Tailwind CSS and TypeScript." },
-    { id: 2, title: "What is Next.js?", content: "Next.js is a React framework that enables server-side rendering, static site generation, and more." },
-    { id: 3, title: "What is Tailwind CSS?", content: "Tailwind CSS is a utility-first CSS framework that helps you build designs without writing custom CSS." },
-    { id: 4, title: "What is TypeScript?", content: "TypeScript is a superset of JavaScript that adds static types to the language." },
-  ]
+  const [questions, setQuestions] = useState<FaqType[]>([]);
 
-  const router = useRouter();
-
-  const toFAQ = () => {
-    router.push("/faq");
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('/api/faq');
+      const data: FaqSchema[] = await res.json();
+      setQuestions(data.map(item => ({
+        id: item.id,
+        title: item.question,
+        content: item.answer
+      })))
+    };
+    fetchData();
+  }, []);
 
   return (
     <section className="w-full flex flex-col mb-10 pb-10 items-center gap-8 py-1">
       <Subtitle title="常見問題" />
       <div>
-        {data.map((item) => (
+        {questions.map((item) => (
           <Collapse key={item.id} props={item}>
             <p className='py-5'>{item.content}</p>
           </Collapse>
       ))}
       </div>
-      <Button2 name="更多問題" handleClick={toFAQ}/>
+      <Link href="/faq">
+        <Button2 name="更多問題"/>
+      </Link>
     </section>
   )
 }
@@ -173,7 +163,7 @@ const FAQView = () => {
 export default function Home() {
   return (
     <>
-      <Carousel />
+      <WCarousel />
       <SlogonView />
       <AboutView />
       <TeamView />

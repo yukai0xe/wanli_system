@@ -1,6 +1,6 @@
 declare namespace team {
     export interface TeamType {
-        id: string;
+        id: number;
         name: string;
         tags: string[];
         content: string;
@@ -17,14 +17,32 @@ declare type CardType = {
     description: string;
 }
 
-declare type FaqType = {
+declare type FaqSchema = {
     id: number;
     question: string;
     answer: string;
+}
+
+declare type FaqType = {
+    id: number;
+    title: string;
+    content: string;
 }
 
 type FooterActivityType = {
     "cover": string | StaticImageData;
     "alt": string;
     "description": string;
+}
+
+declare type TeamSchema = {
+    id: number;
+    name: string;
+    date: Date;
+    teamsize: number;
+    duration: number;
+    place: string;
+    summary: string;
+    content: string;
+    image: string;
 }

@@ -3,7 +3,7 @@ import { Button2 } from "@/app/components/button";
 import { useRouter } from "next/navigation";
 import Subtitle from "@/app/components/subtitle";
 
-export default function DisplayLayout({ children, title }: Readonly<{
+export default function CommonLayout({ children, title }: Readonly<{
     children: React.ReactNode;
     title: string;
 }>) {
