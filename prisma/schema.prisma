@@ -1,26 +1,175 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas  = ["public"]
+}
+
+model Profile {
+  id       String  @id @default(uuid()) @db.Uuid
+  username String? @unique
+  reason   String?
+
+  planTeams PlanTeamMeta[]
+
+  @@map("profiles")
+  @@schema("public")
 }
 
 model Team {
-  id        Int      @id @default(autoincrement())
-  name      String
-  date      DateTime
-  teamsize  Int
-  duration  Int
-  place     String
-  summary   String
-  content   String
-  image     String   // Assuming the image is a URL
+  id       Int      @id @default(autoincrement())
+  name     String
+  date     DateTime
+  teamsize Int
+  duration Int
+  place    String
+  summary  String
+  content  String
+  image    String
+
+  @@schema("public")
 }
 
 model Question {
-  id        Int      @id @default(autoincrement())
-  question  String
-  answer    String
+  id       Int     @id @default(autoincrement())
+  question String
+  answer   String
+  
+  @@schema("public")
+}
+
+enum TeamRole {
+  Leader @map("領隊")
+  Guide @map("嚮導")
+  StayBehind @map("留守")
+  ClubExec @map("隨隊幹部")
+  NormalMember @map("一般隊員")
+
+  @@schema("public")
+}
+
+enum Gender {
+  Male @map("男")
+  Female @map("女")
+
+  @@schema("public")
+}
+
+enum DateType {
+  OneDay  @map("當日來回")
+  MoreDay  @map("過夜")
+
+  @@schema("public")
+}
+
+enum TeamCategory {
+  General @map("一般")
+  Technical @map("技術")
+
+  @@schema("public")
+}
+
+enum TeamActivityType {
+  Official @map("正式隊伍")
+  Private @map("私下隊伍")
+  Exploration @map("探勘")
+
+  @@schema("public")
+}
+
+enum EventState {
+  NotStart @map("仍未開始")
+  InProgress @map("處理中")
+  Done @map("完成囉")
+  Check @map("輸出檔案了")
+
+  @@schema("public")
+}
+
+model Member {
+  id            Int       @id @default(autoincrement())
+  name          String
+  role          TeamRole
+  phone         String
+  address       String?   // optional
+  email         String?   // optional
+  birth         DateTime? // optional
+  IDNumber      String
+  gender        Gender?
+  department    String?
+  studentNumber String?
+
+  planTeamId    Int
+  planTeam      PlanTeam  @relation(fields: [planTeamId], references: [id])
+
+  leaderOf       PlanTeamMeta?  @relation("Leader")
+  guideOf        PlanTeamMeta?  @relation("Guide")
+  staybehindOf   PlanTeamMeta?  @relation("Staybehind")
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@schema("public")
+}
+
+model PlanTeam {
+  id               Int       @id @default(autoincrement())
+  mainName         String
+  mainDescription  String
+  type             Json
+  dateType         DateType
+  startDate        DateTime
+  endDate          DateTime
+  prepareDate      Int
+  expectedTeamSize Int?
+
+  transportType    String[]
+
+  members          Member[]
+
+  planTeamMeta     PlanTeamMeta?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("plan_team")
+  @@schema("public")
+}
+
+model PlanTeamMeta {
+  id           Int       @id @default(autoincrement()) // PK
+  planTeamId   Int       @unique
+  planTeam     PlanTeam  @relation(fields: [planTeamId], references: [id])
+
+  mainName     String    // 從 PlanTeam 複製過來方便查詢（可選）
+  duration     Int       // 可能由 endDate - startDate 計算得來（可選）
+  prepareDate  Int       // 同 PlanTeam
+  startDate    String
+
+  leaderId     Int?       @unique
+  leader       Member?    @relation("Leader", fields: [leaderId], references: [id])
+
+  guideId      Int?       @unique
+  guide        Member?    @relation("Guide", fields: [guideId], references: [id])
+
+  staybehindId Int?       @unique
+  staybehind   Member?    @relation("Staybehind", fields: [staybehindId], references: [id])
+
+  stats        Json
+  teamSize     Int
+  eventState   Json
+
+  belongProfileId  String?     @db.Uuid
+  belong           Profile?   @relation(fields: [belongProfileId], references: [id])
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("plan_team_meta")
+  @@schema("public")
 }

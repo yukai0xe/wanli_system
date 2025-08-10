@@ -7,4 +7,14 @@ const useTeamStore = create((set) => ({
   setCurrentTeam: (team: TeamSchema) => set({ currentTeam: team }),
 }));
 
-export { useTeamStore };
+const useUserStore = create<UserState>((set) => ({
+  username: "",
+  setUsername: (name) => set({ username: name }),
+}));
+
+const useViewState = create<ViewState>((set) => ({
+  loading: true,
+  setLoading: (loading) => set({ loading }),
+}));
+
+export { useTeamStore, useUserStore, useViewState };

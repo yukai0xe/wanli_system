@@ -8,7 +8,7 @@ export default function CommonLayout({ children, title }: Readonly<{
     title: string;
 }>) {
     const router = useRouter();
-    const toHome = () => router.push("/");
+    const toHome = () => router.push("/wanli");
 
     return (
         <main className="shared-layout flex flex-col items-center" style={{paddingTop: '100px', paddingBottom: '100px'}}>

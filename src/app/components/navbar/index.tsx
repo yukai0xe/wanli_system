@@ -4,10 +4,10 @@ import Image from 'next/image';
 import Logo from "@/assets/logo.png";
 
 const links = [
-    { href: "/", label: "主頁" },
-    { href: "/about", label: "關於山社" },
-    { href: "/team", label: "近期隊伍" },
-    { href: "/faq", label: "FAQ" },
+    { href: "/wanli", label: "主頁" },
+    { href: "/wanli/about", label: "關於山社" },
+    { href: "/wanli/team", label: "近期隊伍" },
+    { href: "/wanli/faq", label: "FAQ" },
 ]
 
 const Navbar = () => {
@@ -28,7 +28,7 @@ const Navbar = () => {
                         </li>
                     ))}
                 </ul>
-                <Link href='/admin/'>
+                <Link href='/wanli/admin/'>
                     <span className="border p-5">
                         管理
                     </span>

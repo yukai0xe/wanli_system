@@ -1,0 +1,131 @@
+
+.containerAside {
+    background-color: var(--main-color1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 100%;
+    width: 200px;
+    border-right: 4px solid var(--white);
+}
+
+.asideList{
+    width: 100%;
+}
+
+.asideListItem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    max-width: 100%;
+    background-color: var(--secondary-color);
+    height: 80px;
+    font-size: 1.5rem;
+    box-shadow: inset 0 4px 10px -4px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+.asideListItem:hover{
+    background-color: var(--secondary-color-dark);
+}
+
+.asideListItem.click{
+    background-color: var(--main-color3);
+    border: 4px solid var(--white);
+    border-right: 0px;
+    box-shadow: none;
+    z-index: 4;
+}
+
+.asideListItem.click::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    right: -80px;
+    width: 80px;
+    height: 80px;
+    background-color: var(--white);
+    z-index: 2;
+    clip-path: polygon(0% 0%, 40% 0, 100% 50%, 44% 100%, 0% 100%);
+}
+
+.asideListItem.click::before {
+    content: "";
+    position: absolute;
+    top: 0px;
+    right: -76px;
+    width: 80px;
+    height: 73px;
+    background-color: var(--main-color3);
+    z-index: 3;
+    clip-path: polygon(0% 0%, 40% 0, 100% 50%, 44% 100%, 0% 100%);
+}
+
+.decorationBar {
+    box-shadow: 0 4px 3px -3px rgba(0, 0, 0, 0.5);
+}
+
+.decorationBar.odd {
+    background-color: var(--secondary-color);
+}
+
+.decorationBar.even {
+    background-color: var(--white);
+}
+
+.decorationBarContainer{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.quickLinkContainer{
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100vw;
+    background-color: var(--main-color3);
+    height: 50px;
+    z-index: -1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 30px;
+}
+
+.asideBottomList{
+    width: 100%;
+    margin-top: auto;
+    padding: 10px;
+}
+
+.asideBottomListItemContainer{
+    font-weight: 800;
+    width: 100%;
+    height: 60px;
+    border: 4px solid var(--white);
+    padding: 10px;
+    margin: 10px 0;
+    transition: .2s ease-in-out;
+}
+
+.asideBottomListItemContainer:hover{
+    filter: invert(1);
+}
+
+.asideBottomListItem{
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    align-items: center;
+    filter: invert(1);
+}
+
+.basciForm {
+    margin-bottom: 1rem;
+    padding: 3rem;
+    background-color: var(--white-2);
+    box-shadow: -1px 1px 14px -10px var(--black);
+}
