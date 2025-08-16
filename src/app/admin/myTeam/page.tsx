@@ -7,8 +7,14 @@ import { useRouter } from "next/navigation";
 
 const TeamBarComponent = ({ team }: { team: PlanTeamMeta }) => {
   const router = useRouter();
+  // const { setTeam } = usePlanTeamStore();
+  // const state = usePlanTeamStore.getState();
 
-  const handleClick = (planTeamId: number) => {
+  const handleClick = async (planTeamId: number) => {
+    // if (state.getTeamWithFetch) {
+    //   const team = await state.getTeamWithFetch(planTeamId);
+    //   setTeam(team);
+    // }
     router.push(`/admin/myTeam/${planTeamId}`);
   };
 
@@ -38,7 +44,7 @@ const TeamBarComponent = ({ team }: { team: PlanTeamMeta }) => {
     <div
       key={team.id}
       onClick={() => handleClick(team.planTeamId)}
-      className="border rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-lg transition max-w-3xl mx-auto"
+      className="border rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-lg transition max-w-3xl mx-auto my-10"
     >
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
@@ -159,7 +165,7 @@ const MainPage = () => {
   };
 
   return (
-    <div className="w-full flex items-center flex-col p-10 gap-y-10">
+    <div className="w-full flex items-center flex-col p-10 gap-y-5">
       {!addNewTeam ? (
         <>
           <Button3

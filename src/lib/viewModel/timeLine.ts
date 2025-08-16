@@ -1,0 +1,53 @@
+import { Event } from "@/types/enum";
+
+export const timelineData = [
+  {
+    id: 1,
+    date: "",
+    title: "還未設置時間",
+    label: Event.firstMeetingState,
+    labelClassName: "uk-label-success",
+    moreAction: true,
+    link: "/firstMeeting",
+    buttonLabel: "查看",
+  },
+  {
+    id: 2,
+    date: "",
+    title: "還未設置時間",
+    label: Event.firstCheckItemState,
+    labelClassName: "uk-label-warning",
+    moreAction: false,
+    buttonLabel: "查看",
+    link: "checkItems",
+  },
+  {
+    id: 3,
+    date: "",
+    title: "還未設置時間",
+    label: Event.secondCheckItemState,
+    labelClassName: "uk-label-danger",
+    link: "checkItems",
+    buttonLabel: "查看",
+    moreAction: false,
+  },
+  {
+    id: 4,
+    date: "",
+    title: "還未設置時間",
+    label: Event.runForSchoolState,
+    moreAction: false,
+    buttonLabel: "查看",
+    labelClassName: "uk-label-danger",
+  },
+  {
+    id: 5,
+    date: "",
+    title: "還未設置時間",
+    label: Event.finalCheckState,
+    moreAction: true,
+    labelClassName: "uk-label-danger",
+    link: "finalCheck",
+    buttonLabel: "查看",
+  },
+];

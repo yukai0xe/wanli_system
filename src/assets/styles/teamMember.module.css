@@ -1,0 +1,30 @@
+.tabContainer {
+    position: relative;
+    background-color: var(--white-2);
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.activeTab{
+    position: absolute;
+    left: 0;
+    transform-origin: left;
+    background-color: var(--main-color5);
+    border-radius: 10px;
+    padding: 5px;
+    color: var(--white-2);
+    height: calc(100% - 10px);
+    transition: transform 0.3s ease;
+    z-index: 0;
+}
+
+.tabContainer .active {
+    z-index: 2;
+    color: var(--white-2);
+    transition: color 0.3s ease;
+}
+
+.contentContainer{
+    background-color: var(--white-2);
+    border-radius: 10px;
+}

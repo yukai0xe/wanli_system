@@ -47,10 +47,16 @@ class PlanTeamService {
 
   static async getPlanTeamById(id: number) {
     try {
-      return await prisma.planTeam.findUnique({
+      const data = await prisma.planTeam.findUnique({
         where: { id },
-        include: { members: true },
+        include: {
+          members: true,
+          planTeamMeta: true
+        }
       });
+      if (!data) return null;
+      const { planTeamMeta, ...team } = data;
+      return { team, planTeamMeta };
     } catch (error) {
       console.error('Error fetching PlanTeam by id:', error);
       throw error;

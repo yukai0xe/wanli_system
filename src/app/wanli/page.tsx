@@ -75,20 +75,20 @@ const AboutView = () => {
 const TeamView = () => {
   const [teams, setTeams] = useState<CardType[]>([]);
   
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch('/api/teams');
-      const data = await res.json();
-      const teams = data.map((team: TeamSchema) => ({
-        id: team.id,
-        title: team.name,
-        description: team.content,
-        src: '/' + team.image || Default
-      }));
-      setTeams(teams.slice(0, 3));
-    }
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const res = await fetch('/api/teams');
+  //     const data = await res.json();
+  //     const teams = data.map((team: TeamSchema) => ({
+  //       id: team.id,
+  //       title: team.name,
+  //       description: team.content,
+  //       src: '/' + team.image || Default
+  //     }));
+  //     setTeams(teams.slice(0, 3));
+  //   }
+  //   fetchData();
+  // }, []);
 
   return (
     <section className="relative w-full flex flex-col items-center gap-8"

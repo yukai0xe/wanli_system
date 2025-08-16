@@ -1,15 +1,19 @@
 'use client'
 // import { useState, useEffect } from "react";
-import { useUserStore } from "@/state/store";
+// import { useUserStore } from "@/state/store";
+import styles from "@/assets/styles/teamMember.module.css"
 
 const MainPage = () => {
-  const username = useUserStore((state: UserState) => state.username);
+  // const username = useUserStore((state: UserState) => state.username);
 
   return (
-   <div className="flex flex-col w-full justify-center items-center gap-y-10">
-      <h1 className="text-5xl">歡迎~ {username}</h1>
+    <div className={`flex w-full flex-col justify-center items-center gap-y-5`}>
+      <div
+        className={`w-full min-h-screen mb-10 flex justify-center items-center ${styles.contentContainer}`}
+      >
+      </div>
     </div>
-  )
+  );
 }
 
 export default MainPage;

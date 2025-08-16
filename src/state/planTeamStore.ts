@@ -1,6 +1,6 @@
 import { DateType, TeamActivityType, TeamCategory, EventState } from "@/types/enum";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, devtools } from "zustand/middleware";
 import { parseEnumKey } from "@/lib/utility";
 
 const initialTeam: PlanTeam = {
@@ -36,14 +36,14 @@ export const useDraftTeamStore = create<PlanTeamState>()(
         resetTeam: () => set({ id: null, team: initialTeam }),
     }),
     {
-      name: "planTeam",
+      name: "draftTeam",
     }
   )
 )
 
 // use for current selected planning team
 export const usePlanTeamStore = create<PlanTeamState>()(
-    (set, get) => ({
+    devtools((set, get) => ({
         id: null,
         team: initialTeam,
         setId: (id: number) =>
@@ -57,8 +57,8 @@ export const usePlanTeamStore = create<PlanTeamState>()(
         resetTeam: () => set({ id: null, team: initialTeam }),
         getTeamWithFetch: async (idParam: number) => {
             const state = get();
-            if (state.id) {
-                return state.team;
+            if (state.id  === idParam) {
+              return state.team;
             } else {
                 try {
                     const accessToken = localStorage.getItem("access_token");
@@ -69,12 +69,14 @@ export const usePlanTeamStore = create<PlanTeamState>()(
                     });
                     if (!res.ok) throw new Error('Network response was not ok');
 
-                    const fetchedTeam = await res.json();
-
-                    if (!fetchedTeam) throw new Error('Team not found');
-                    
-                    set({ team: fetchedTeam, id: idParam });
-                    return fetchedTeam;
+                    const fetchedTeamData = await res.json();
+                    if (!fetchedTeamData) throw new Error('Team not found');
+                    const { team, planTeamMeta } = fetchedTeamData;
+                    set({ team, id: idParam });
+                  
+                    const metaStore = usePlanTeamMetaStore.getState();
+                    if(!metaStore.getPlanTeamMetaById(idParam)) metaStore.addPlanTeamMeta(planTeamMeta);
+                    return team;
 
                 } catch (err) {
                     console.error('Fetch error:', err);
@@ -82,29 +84,37 @@ export const usePlanTeamStore = create<PlanTeamState>()(
                 }
             }
         },
-    })
-);
+    }),
+      {name: "planTeam"}
+));
 
 // display all planning team meta for current user or group
-export const usePlanTeamMetaStore = create<PlanTeamMetaStore>((set, get) => ({
-  teamMetas: [],
+export const usePlanTeamMetaStore = create<PlanTeamMetaStore>()(
+  devtools(
+    (set, get) => ({
+      teamMetas: [],
 
-  setPlanTeamMeta: (metas: PlanTeamMeta[]) => set({ teamMetas: metas }),
+      setPlanTeamMeta: (metas: PlanTeamMeta[]) => set({ teamMetas: metas }),
 
-  addPlanTeamMeta: (meta) =>
-    set((state) => ({ teamMetas: [...state.teamMetas, meta] })),
+      addPlanTeamMeta: (meta) =>
+        set((state) => ({
+          teamMetas: [...state.teamMetas, meta]
+        })),
 
-  updatePlanTeamMeta: (id, updated) =>
-    set((state) => ({
-      teamMetas: state.teamMetas.map((team) =>
-        team.id === id ? { ...team, ...updated } : team
-      ),
-    })),
+      updatePlanTeamMeta: (id, updated) =>
+        set((state) => ({
+          teamMetas: state.teamMetas.map((team) =>
+            team.id === id ? { ...team, ...updated } : team
+          ),
+        })),
 
-  removePlanTeamMeta: (id) =>
-    set((state) => ({
-      teamMetas: state.teamMetas.filter((team) => team.id !== id),
-    })),
+      removePlanTeamMeta: (id) =>
+        set((state) => ({
+          teamMetas: state.teamMetas.filter((team) => team.id !== id),
+        })),
 
-  getPlanTeamMetaById: (id) => get().teamMetas.find((team) => team.id === id),
-}));
+      getPlanTeamMetaById: (id) => get().teamMetas.find((team) => team.id === id) || null,
+    }),
+    { name: "PlanTeamMetaStore" }
+  )
+);

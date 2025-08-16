@@ -40,3 +40,11 @@ export enum ItemCheckState {
   SecondCheck = "有複檢了",
   Ok = "裝備檢查通過"
 }
+
+export enum Event {
+  firstMeetingState = "行前會",
+  firstCheckItemState = "裝備初檢",
+  secondCheckItemState = "裝備複檢",
+  runForSchoolState = "跑公文",
+  finalCheckState = "審留守"
+}

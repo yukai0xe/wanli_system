@@ -3,14 +3,15 @@ import button2_styles from './button2.module.css';
 import button3_styles from "./button3.module.css";
 import Image from "next/image";
 
-const Button1 = ({ name, style, handleClick }: {
+const Button1 = ({ name, style, animate, handleClick }: {
     name: string,
     style?: React.CSSProperties,
+    animate: boolean
     handleClick?: () => void
 }) => {
     return (
         <button
-            className={`${button1_styles.button} ${button1_styles.secondary}`}
+            className={`${button1_styles.button} ${button1_styles.secondary} ${animate && button1_styles.animate}`}
             aria-label="Bouton Secondaire"
             role="button"
             style={style}

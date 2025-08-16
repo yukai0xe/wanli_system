@@ -82,17 +82,17 @@
 }
 
 .quickLinkContainer{
+    float: right;
     position: absolute;
     top: 0;
     right: 0;
+    display: flex;
+    justify-content: flex-end;
     width: 100vw;
     background-color: var(--main-color3);
     height: 50px;
-    z-index: -1;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
     padding: 0 30px;
+    box-shadow: 0 -50px 0 0 var(--secondary-color), 0 8px 2px rgba(52, 52, 52, 0.2);
 }
 
 .asideBottomList{
