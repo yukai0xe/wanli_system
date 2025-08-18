@@ -48,3 +48,18 @@ export enum Event {
   runForSchoolState = "跑公文",
   finalCheckState = "審留守"
 }
+
+export enum finalPlanType {
+  teamMemberList = "隊員名單",
+  personalItemList = "個人裝備表",
+  teamItemList = "團隊裝備表",
+  supply = "糧單",
+  route = "預計行程/參考行程",
+  BPlan = "撤退計畫/拆隊計畫",
+  map = "航跡圖",
+  other = "其他(水源、訊號、急救站、交通)"
+}
+
+export enum FileType {
+  firstMeeting = "行前會"
+}

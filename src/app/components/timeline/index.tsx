@@ -1,11 +1,12 @@
 'use client'
 import styles from "@/assets/styles/components/timeline.module.css";
-import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import InputComponent from "@/app/components/form/input";
 import { Button1 } from "@/app/components/button";
 import DialogComponent from "@/app/components/dialog";
 import { useState } from "react";
+import { IoIosBonfire } from "react-icons/io";
+import { MdEventNote } from "react-icons/md";
 
 export interface TimelineItem {
   id: number;
@@ -134,13 +135,7 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
               toggleClick(settingState.label);
             }}
           >
-            <Image
-              src="/calendar-day.svg"
-              alt="icon"
-              width={30}
-              height={30}
-              style={{ filter: "invert(1)" }}
-            />
+            <MdEventNote className="size-8 invert-[1] text-center" />
           </div>
           {settingState.label && (
             <div className={styles.miniLabel}>安排事件設定</div>
@@ -159,30 +154,25 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
                   <InputComponent
                     key={item.id}
                     direction
-                    item={{
-                      id: "",
-                      name: "",
-                      type: "date",
-                      placeholder: "輸入日期",
-                      label: `${item.label} 日期`,
-                      value: item.date,
-                      inputChangeHandler: (v: string) => {
-                        setEvents((prev) =>
-                          prev.map((i) =>
-                            i.id === item.id ? { ...i, date: v } : i
-                          )
-                        );
-                      },
+                    input={{ type: "date" }}
+                    placeholder={"輸入日期"}
+                    label={`${item.label} 日期`}
+                    value={item.date}
+                    inputChangeHandler={(v: string) => {
+                      setEvents((prev) =>
+                        prev.map((i) =>
+                          i.id === item.id ? { ...i, date: v } : i
+                        )
+                      );
                     }}
                   />
                 ))}
                 <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-8">
                   <Button1
-                    name="新增時間"
                     animate={false}
                     style={{ color: "var(--white-2)", padding: "5px", gap: 0 }}
                     handleClick={() => setAddNewEvent(true)}
-                  />
+                  >新增時間</Button1>
                 </div>
                 {addNewEvent && (
                   <DialogComponent
@@ -197,24 +187,19 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
                   >
                     <InputComponent
                       direction
-                      item={{
-                        type: "text",
-                        label: "安排事件名稱",
-                        placeholder: "輸入名稱",
-                        inputChangeHandler: (v: string) => {
-                          setNewEvent({ ...newEvent, label: v });
-                        },
-                      }}
+                      input={{ type: "text" }}
+                      label={"安排事件名稱"}
+                      placeholder={"輸入名稱"}
+                      inputChangeHandler={(v: string) =>
+                        setNewEvent({ ...newEvent, label: v })
+                      }
                     />
                     <InputComponent
                       direction
-                      item={{
-                        type: "date",
-                        label: "安排事件日期",
-                        inputChangeHandler: () => (v: string) => {
-                          setNewEvent({ ...newEvent, date: v });
-                        },
-                      }}
+                      input={{ type: "date" }}
+                      inputChangeHandler={(v: string) =>
+                        setNewEvent({ ...newEvent, date: v })
+                      }
                     />
                   </DialogComponent>
                 )}
@@ -231,13 +216,7 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
               }`}
               onClick={() => toggleClick(item.id)}
             >
-              <Image
-                src="/bulb.svg"
-                alt="icon"
-                width={30}
-                height={30}
-                style={{ filter: "invert(1)" }}
-              />
+              <IoIosBonfire className="size-8 invert-[1] text-center" />
             </div>
             {events.find((event) => event.id === item.id)?.showLabel && (
               <div className={styles.miniLabel}>{item.label}</div>

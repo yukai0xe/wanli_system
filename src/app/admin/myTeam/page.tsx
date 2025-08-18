@@ -4,6 +4,7 @@ import { Button3 } from "@/app/components/button";
 import { AnimatedAddNewTeam } from "@/app/components/form/newTeam";
 import { usePlanTeamStore, useDraftTeamStore, usePlanTeamMetaStore } from '@/state/planTeamStore';
 import { useRouter } from "next/navigation";
+import { FaRegSquarePlus } from "react-icons/fa6";
 
 const TeamBarComponent = ({ team }: { team: PlanTeamMeta }) => {
   const router = useRouter();
@@ -168,11 +169,10 @@ const MainPage = () => {
     <div className="w-full flex items-center flex-col p-10 gap-y-5">
       {!addNewTeam ? (
         <>
-          <Button3
-            icon="/square-plus.svg"
-            name="我要開隊"
-            handleClick={() => setAddNewTeam(true)}
-          />
+          <Button3 handleClick={() => setAddNewTeam(true)}>
+            <FaRegSquarePlus className="size-8" />
+            我要開隊
+          </Button3>
           <div className="w-full max-w-4xl mx-auto">
             {planTeams.length > 0 ? (
               planTeams.map((team) => (

@@ -4,8 +4,9 @@ import { usePlanTeamStore, usePlanTeamMetaStore } from "@/state/planTeamStore";
 import { useRouter } from "next/navigation";
 import { timelineData } from "@/lib/viewModel/timeLine";
 import { useEffect, useState } from "react";
-import { Event } from "@/types/enum";
+import { Event, TeamRole } from "@/types/enum";
 import { parseEnumKey } from "@/lib/utility";
+import { PiNotePencilFill } from "react-icons/pi";
 
 interface FileItem {
   id: string;
@@ -58,7 +59,7 @@ export default function TeamOverview() {
   }, [teamId, teamMetas]);
   
   return (
-    <div className="flex space-x-6 p-6">
+    <div className="flex space-x-6 p-6 ml-12">
       {/* 左邊 Timeline - 固定寬度 */}
       <div className="w-1/3">
         <Timeline items={timelineViewData} />
@@ -66,24 +67,64 @@ export default function TeamOverview() {
 
       {/* 右邊 Overview - 佔剩餘寬度 */}
       <div className="w-2/3">
-        <h1 className="text-2xl font-bold mb-3">{team.mainName}</h1>
-        <div className="mb-4 text-gray-700 bg-gray-50 rounded-lg p-6 shadow">
+        <div className="flex gap-x-2 items-end mb-3">
+          <h1 className="text-2xl font-bold">
+            {team.mainName || "載入隊伍資料中..."}
+          </h1>
+          {!complete ? (
+            <p className="text-blue-600 font-semibold">
+              {" "}
+              距離出發還剩 {daysLeft} 天{" "}
+            </p>
+          ) : (
+            <p className="text-red-600 font-semibold"> 此活動已結束 </p>
+          )}
+        </div>
+        <div className="w-full relative flex flex-col gap-y-3 mb-4 text-gray-700 bg-gray-50 rounded-lg p-6 shadow">
+          <PiNotePencilFill
+            title="編輯內容"
+            className="cursor-pointer size-10 absolute top-0 right-0 hover:bg-gray-300 rounded duration-200 trasition p-1 mr-3 mt-3"
+          />
           <p>
-            <span className="font-semibold">出發時間：</span>{" "}
+            <span className="font-semibold">出隊時間：</span>
             {typeof team.startDate === "string"
-              ? team.startDate
+              ? team.startDate.split("T")[0]
               : team.startDate?.toLocaleDateString()}
+            {team.startDate !== team.endDate && " ~ "}
+            {team.startDate !== team.endDate && typeof team.endDate === "string"
+              ? team.endDate.split("T")[0]
+              : team.endDate?.toLocaleString()}
           </p>
           <p>
-            <span className="font-semibold">結束時間：</span>{" "}
-            {typeof team.endDate === "string"
-              ? team.endDate
-              : team.endDate?.toLocaleDateString()}
+            <span className="font-semibold">預備天：</span>
+            {team.prepareDate} 天
           </p>
-          {!complete ? 
-            <p className="mt-2 text-blue-600 font-semibold"> 距離出發還剩 {daysLeft} 天 </p> :
-            <p className="mt-2 text-red-600 font-semibold"> 此活動已結束 </p>
-          }
+          <p>
+            <span className="font-semibold">交通方式：</span>
+            {team.transportType.length > 0
+              ? team.transportType.join(", ")
+              : "尚未決定"}
+          </p>
+          <div className="flex justify-between w-full">
+            <span>
+              {`${TeamRole.Leader}: ${
+                team.members.find((m) => m.role === TeamRole.Leader)?.name ||
+                "尚未指派"
+              }`}
+            </span>
+            <span>
+              {`${TeamRole.Guide}: ${
+                team.members.find((m) => m.role === TeamRole.Guide)?.name ||
+                "尚未指派"
+              }`}
+            </span>
+            <span>
+              {`${TeamRole.StayBehind}: ${
+                team.members.find((m) => m.role === TeamRole.StayBehind)
+                  ?.name || "尚未指派"
+              }`}
+            </span>
+          </div>
         </div>
 
         <div>

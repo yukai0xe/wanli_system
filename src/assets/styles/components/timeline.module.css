@@ -45,6 +45,7 @@
     transition: .2s ease-in-out;
     cursor: pointer;
     display: flex;
+    text-align: center;
     align-items: center;
     justify-content: center;
 }

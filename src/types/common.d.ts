@@ -1,6 +1,22 @@
 import { StaticImageData } from "next/image";
 
 declare global {
+  interface fileObject {
+    id: string,
+    file: File,
+    displayName: string,
+    type: FileType
+  }
+
+  type InputObject = { type: "text"} | { type: "date"} | { type: "checkbox"} |
+  {
+    type: "select",
+    value: {
+        label: string,
+        value: string  
+    }[]
+  }
+  
   type CardType = {
     id: number;
     src: string | StaticImageData;

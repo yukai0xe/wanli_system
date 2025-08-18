@@ -91,6 +91,21 @@ enum EventState {
   @@schema("public")
 }
 
+enum FileType {
+  firstMeeting @map("行前會")
+  @@schema("public")
+}
+
+model FileObject {
+  id           String   @id @default(uuid())
+  storagePath  String
+  displayName  String?
+  type         FileType?
+  createdAt    DateTime @default(now())
+
+  @@schema("public")
+}
+
 model Member {
   id            Int       @id @default(autoincrement())
   name          String

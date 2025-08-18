@@ -4,13 +4,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-height: 100%;
-    width: 200px;
     border-right: 4px solid var(--white);
+    z-index: 3;
 }
 
 .asideList{
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
+    transition:  .2s ease-in-out;
 }
 
 .asideListItem {
@@ -37,6 +40,10 @@
     border-right: 0px;
     box-shadow: none;
     z-index: 4;
+}
+
+.asideListItem.click:hover{
+    opacity: .2;
 }
 
 .asideListItem.click::after {

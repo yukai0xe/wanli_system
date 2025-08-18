@@ -18,7 +18,7 @@ const Page = ({ children }: {
     fetchTeam();
   }, []);
 
-  return <div className="pl-10 pr-10 pt-10">{children}</div>;
+  return <div className="pl-2 pr-2 pt-10">{children}</div>;
 };
 
 export default Page;

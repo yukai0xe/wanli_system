@@ -3,45 +3,17 @@
 import { usePlanTeamStore } from "@/state/planTeamStore";
 import styles from "@/assets/styles/finalCheck.module.css"
 import { useState, useRef, useEffect } from "react";
+import TeamMember from "@/app/admin/TeamMember";
+import ItemList from "@/app/admin/ItemList";
+import { finalPlanType } from "@/types/enum";
+import { teamMemberFakeData as tmfake, personalIteamListFakeData as pitemfake } from "@/lib/viewModel/tableData";
 
-const tabs = [
-  {
-    label: "隊員名單",
-    active: false,
-  },
-  {
-    label: "個人裝備表",
-    active: false,
-  },
-  {
-    label: "團體裝備表",
-    active: false,
-  },
-  {
-    label: "預計行程/參考行程",
-    active: false,
-  },
-  {
-    label: "糧單",
-    active: false,
-  },
-  {
-    label: "航跡圖",
-    active: false,
-  },
-  {
-    label: "撤退計畫",
-    active: false,
-  },
-  {
-    label: "拆隊計畫",
-    active: false,
-  },
-  {
-    label: "其他(水源、訊號、急救站、交通)",
-    active: false,
-  },
-];
+const tabs = Object.values(finalPlanType).map((type) => {
+  return {
+    label: type,
+    active: [finalPlanType.teamMemberList, finalPlanType.personalItemList, finalPlanType.teamItemList].includes(type)
+  };
+});
 
 const Page = () => {
   const team = usePlanTeamStore((state: PlanTeamState) => state.team);
@@ -63,6 +35,19 @@ const Page = () => {
       }
     }
   }, [selectedTab, tabs]);
+
+  const renderTab = (id: number) => {
+    switch (id) {
+      case 0:
+        return (
+          <TeamMember rowsProp={tmfake.rowsHeader} dataProp={tmfake.rowsData} />
+        );
+      case 1:
+      case 2:
+        return <ItemList rowsProp={pitemfake.rowsHeader} dataProp={pitemfake.rowsData} />;
+    }
+  }
+
   console.log(team);
   return (
     <div className={`flex w-full flex-col justify-center items-center gap-y-5`}>
@@ -97,6 +82,7 @@ const Page = () => {
       <div
         className={`w-full min-h-screen mb-10 flex justify-center items-center ${styles.contentContainer}`}
       >
+        { renderTab(selectedTab) }
         {!tabs[selectedTab].active && (
           <div className="flex flex-col text-center gap-y-5">
             <p className="text-5xl">{tabs[selectedTab].label}</p>

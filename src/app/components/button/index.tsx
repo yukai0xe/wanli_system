@@ -1,27 +1,39 @@
+import React from 'react';
 import button1_styles from './button1.module.css';
 import button2_styles from './button2.module.css';
 import button3_styles from "./button3.module.css";
-import Image from "next/image";
 
-const Button1 = ({ name, style, animate, handleClick }: {
-    name: string,
-    style?: React.CSSProperties,
-    animate: boolean
-    handleClick?: () => void
+const Button1 = ({
+    children,
+    style,
+    animate=false,
+    disabled,
+    className,
+    handleClick,
+}: {
+    children: React.ReactNode
+    style?: React.CSSProperties;
+    animate?: boolean;
+    disabled?: boolean;
+    className?: string;
+    handleClick?: () => void;
 }) => {
-    return (
-        <button
-            className={`${button1_styles.button} ${button1_styles.secondary} ${animate && button1_styles.animate}`}
-            aria-label="Bouton Secondaire"
-            role="button"
-            style={style}
-            onClick={handleClick}
-        >
-            <i className="fas fa-share" aria-hidden="true"></i>
-            <span>{name}</span>
-        </button>
-    )
-}
+  return (
+    <button
+      disabled={disabled}
+      className={`${className} ${button1_styles.button} ${
+        button1_styles.secondary
+      } ${animate && button1_styles.animate} `}
+      aria-label="Bouton Secondaire"
+      role="button"
+      style={style}
+      onClick={handleClick}
+    >
+      <i className="fas fa-share" aria-hidden="true"></i>
+      {children}
+    </button>
+  );
+};
 
 const Button2 = ({ name, style, handleClick }: {
     name: string,
@@ -39,10 +51,9 @@ const Button2 = ({ name, style, handleClick }: {
     )
 }
 
-const Button3 = ({ name, style, icon, handleClick }: {
-    name: string,
+const Button3 = ({ children, style, handleClick }: {
+    children: React.ReactNode
     style?: React.CSSProperties,
-    icon: string,
     handleClick?: () => void
 }) => {
     return (
@@ -56,8 +67,7 @@ const Button3 = ({ name, style, icon, handleClick }: {
             }}
             onClick={handleClick}
         >
-            <Image src={icon} width={30} height={30} alt={icon}/>
-            {name}
+            {children}
         </button>
     );
 }

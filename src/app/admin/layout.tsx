@@ -7,6 +7,18 @@ import { supabase } from "@/lib/supabaseClient";
 import { useUserStore, useViewState } from "@/state/store";
 import Image from "next/image";
 import { usePlanTeamStore } from "@/state/planTeamStore";
+import Logo from "@/assets/logo2.png";
+import {
+  HiOutlineArrowRightEndOnRectangle,
+  HiHome,
+  HiArrowLeft,
+  HiArrowRight
+} from "react-icons/hi2";
+import { GiMountaintop } from "react-icons/gi";
+import { PiPersonSimpleHikeFill } from "react-icons/pi";
+import { FaFileInvoice } from "react-icons/fa";
+import { MdListAlt } from "react-icons/md";
+import { FaGear } from "react-icons/fa6";
 
 export const prefixUrl = "/admin";
 
@@ -85,7 +97,32 @@ const EntryPage = ({
       })
   }, []);
 
-  return <>{loading ? "This is Loading" : <DashboardLayout>{ children }</DashboardLayout>}</>;
+  const [dots, setDots] = useState("");
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev.length >= 5 ? "" : prev + "."));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <>
+      {loading ? (
+        <div className="w-full h-dvh flex justify-center items-center gap-x-5">
+          <Image
+            className="animate-fade"
+            style={{ width: "200px", height: "200px" }}
+            src={Logo}
+            alt=""
+          />
+          <div className="text-xl">正在找路中{dots}</div>
+        </div>
+      ) : (
+        <DashboardLayout>{children}</DashboardLayout>
+      )}
+    </>
+  );
 };
 
 const DashboardLayout = ({
@@ -96,34 +133,39 @@ const DashboardLayout = ({
   const router = useRouter();
   const pathname = usePathname().split("/");
   const navberModel = [
-    { id: 1, displayText: "隊伍管理", icon: '/goal-mountain.svg', path: prefixUrl + "/myTeam" },
-    { id: 2, displayText: "隊員管理", icon: '/hiking.svg', path: prefixUrl + "/myTeamMember" },
-  ];
-
-  const bottomModel = [
     {
       id: 1,
-      displayText: "登出",
-      icon: "/leave.svg",
-      handler: async () => {
-        await supabase.auth.signOut();
-        router.push("/wanli/admin");
-      }
+      displayText: "隊伍管理",
+      path: prefixUrl + "/myTeam",
     },
     {
       id: 2,
-      displayText: "回到主頁",
-      icon: "/home.svg",
-      handler: 
-        async () => {
-          router.push("/wanli");
-        },
+      displayText: "隊員紀錄",
+      path: prefixUrl + "/myTeamMember",
+    },
+    {
+      id: 3,
+      displayText: "檔案管理",
+      path: prefixUrl + "/fileTemplate",
     },
   ];
 
+  const renderIcon = (id: number) => {
+    switch (id) {
+      case 1:
+        return <GiMountaintop className="size-8" />;
+      case 2:
+        return <PiPersonSimpleHikeFill className="size-8" />;
+      case 3:
+        return <FaFileInvoice className="size-8" />;
+    }
+  }
+
   const username = useUserStore((state) => state.username);
   const team = usePlanTeamStore((state) => state.team);
+  const id = usePlanTeamStore((state) => state.id);
   const [title, setTitle] = useState<string>("");
+  const [isFold, setIsFold] = useState<boolean>(false);
   useEffect(() => {
     const newBars = Array.from({ length: 5 }).map(() => {
       const height = Math.floor(Math.random() * 6) + 10; // 10 ~ 20
@@ -161,14 +203,49 @@ const DashboardLayout = ({
   }, [pathname, team])
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden relative">
       <div className={`${styles.quickLinkContainer}`}>
         <div className="w-5/6 flex justify-end items-center">
-          <span className="mr-auto">{ title }</span>
-          <span>歡迎~ {username}</span>
+          <span className="mr-auto ml-5">{title}</span>
+          <div className="flex gap-x-2 items-center">
+            <span>歡迎~ {username}</span>
+            <HiOutlineArrowRightEndOnRectangle
+              onClick={async () => {
+                await supabase.auth.signOut();
+                router.push("/wanli/admin");
+              }}
+              title="登出"
+              className="size-10 cursor-pointer rounded p-2 hover:bg-yellow-100 transition"
+            />
+            <HiHome
+              onClick={() => {
+                router.push("/wanli");
+              }}
+              title="回到首頁"
+              className="size-10 cursor-pointer hover:bg-yellow-100 rounded p-2 transition"
+            />
+            {pathname.length > 4 && (
+              <MdListAlt
+                onClick={() => {
+                  router.push(`/admin/myTeam/${id}`);
+                }}
+                title={"返回概覽"}
+                className="size-10 cursor-pointer hover:bg-yellow-100 rounded p-2 transition"
+              />
+            )}
+            {pathname.length > 3 && team != null && (
+              <FaGear title="隊伍設定" className="size-10 cursor-pointer hover:rotate-90 transition p-2 duration-1000" />
+            )}
+          </div>
         </div>
       </div>
-      <aside className={styles.containerAside}>
+      <aside
+        className={`${
+          styles.containerAside
+        } w-[200px] absolute h-full transition-transform duration-200 ease-in-out shrink-0 ${
+          isFold ? "-translate-x-[80%]" : "translate-x-0"
+        }`}
+      >
         <div className={styles.decorationBarContainer}>
           {bars.length === 0
             ? null
@@ -182,49 +259,45 @@ const DashboardLayout = ({
                 ></div>
               ))}
         </div>
-        <ul className={styles.asideList}>
-          {navberModel.map((item) => {
-            const isActive = item.path
-              .split("/")
-              .every((val, idx) => val === pathname[idx]);
-            return (
-              <Link key={item.id} href={item.path}>
-                <li
-                  className={`${styles.asideListItem} ${
-                    isActive ? styles.click : ""
-                  }`}
-                >
-                  <Image
-                    src={item.icon}
-                    alt={item.icon}
-                    width={32}
-                    height={32}
-                  />
-                  {item.displayText}
-                </li>
-              </Link>
-            );
-          })}
-        </ul>
-        <ul className={styles.asideBottomList}>
-          {bottomModel.map((item) => (
-            <button
-              key={item.id}
-              className={styles.asideBottomListItemContainer}
-              onClick={(e) => {
-                e.preventDefault();
-                item.handler();
-              }}
-            >
-              <li className={styles.asideBottomListItem}>
-                <Image src={item.icon} alt={item.icon} width={32} height={32} />
-                {item.displayText}
-              </li>
-            </button>
-          ))}
-        </ul>
+        <div className="relative w-full">
+          <ul className={styles.asideList}>
+            {navberModel.map((item) => {
+              const isActive = item.path
+                .split("/")
+                .every((val, idx) => val === pathname[idx]);
+              return (
+                <Link key={item.id} href={item.path}>
+                  <li
+                    className={`${styles.asideListItem} ${
+                      isActive ? styles.click : ""
+                    }`}
+                  >
+                    {renderIcon(item.id)}
+                    {item.displayText}
+                  </li>
+                </Link>
+              );
+            })}
+            {isFold ? (
+              <HiArrowRight
+                onClick={() => setIsFold(!isFold)}
+                className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer hover:text-gray-200 hover:translate-x-1 p-2 transition"
+              />
+            ) : (
+              <HiArrowLeft
+                onClick={() => setIsFold(!isFold)}
+                className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer hover:text-gray-200 hover:-translate-x-1 p-2 transition"
+              />
+            )}
+          </ul>
+        </div>
       </aside>
-      <main className="w-full overflow-y-scroll" style={{ marginTop: "50px" }}>
+      <main
+        className={`flex-1 overflow-y-scroll transition-ml duration-200 ease-in-out ${
+          !isFold ? "ml-[200px]" : "ml-[60px]"
+        }`}
+        style={{ marginTop: "50px" }}
+      >
         {children}
       </main>
     </div>
