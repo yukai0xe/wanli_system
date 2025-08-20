@@ -4,9 +4,11 @@ import { usePlanTeamStore, usePlanTeamMetaStore } from "@/state/planTeamStore";
 import { useRouter } from "next/navigation";
 import { timelineData } from "@/lib/viewModel/timeLine";
 import { useEffect, useState } from "react";
-import { Event, TeamRole } from "@/types/enum";
+import { Event, TeamRole, TransportType } from "@/types/enum";
 import { parseEnumKey } from "@/lib/utility";
 import { PiNotePencilFill } from "react-icons/pi";
+import InputComponent from "@/app/components/form/input";
+import { FaPhoneAlt } from "react-icons/fa";
 
 interface FileItem {
   id: string;
@@ -16,10 +18,10 @@ interface FileItem {
 
 export default function TeamOverview() {
   const router = useRouter();
-
+  const [editTeam, setEditTeam] = useState<boolean>(false);
+  const { setTeam, team } = usePlanTeamStore();
+  const teamId = usePlanTeamStore((state) => state.id);
   const recentFiles: FileItem[] = [];
-  const team = usePlanTeamStore(state => state.team);
-  const teamId = usePlanTeamStore(state => state.id);
   const { getPlanTeamMetaById, teamMetas }  = usePlanTeamMetaStore();
   const today = new Date();
   const startDate = new Date(team.startDate);
@@ -80,51 +82,229 @@ export default function TeamOverview() {
             <p className="text-red-600 font-semibold"> 此活動已結束 </p>
           )}
         </div>
-        <div className="w-full relative flex flex-col gap-y-3 mb-4 text-gray-700 bg-gray-50 rounded-lg p-6 shadow">
+        <div
+          className={`w-full relative flex flex-col gap-y-3 mb-4 
+          text-gray-700 bg-gray-50 rounded-lg p-6 shadow`}
+        >
           <PiNotePencilFill
             title="編輯內容"
-            className="cursor-pointer size-10 absolute top-0 right-0 hover:bg-gray-300 rounded duration-200 trasition p-1 mr-3 mt-3"
+            onClick={() => setEditTeam(!editTeam)}
+            className={`cursor-pointer size-10 absolute top-0 right-0 
+            hover:bg-gray-300 rounded duration-200 trasition p-1 mr-3 mt-3 ${
+              editTeam && "bg-gray-300 rounded"
+            }`}
           />
-          <p>
-            <span className="font-semibold">出隊時間：</span>
-            {typeof team.startDate === "string"
-              ? team.startDate.split("T")[0]
-              : team.startDate?.toLocaleDateString()}
-            {team.startDate !== team.endDate && " ~ "}
-            {team.startDate !== team.endDate && typeof team.endDate === "string"
-              ? team.endDate.split("T")[0]
-              : team.endDate?.toLocaleString()}
-          </p>
-          <p>
-            <span className="font-semibold">預備天：</span>
-            {team.prepareDate} 天
-          </p>
-          <p>
-            <span className="font-semibold">交通方式：</span>
-            {team.transportType.length > 0
-              ? team.transportType.join(", ")
-              : "尚未決定"}
-          </p>
-          <div className="flex justify-between w-full">
-            <span>
-              {`${TeamRole.Leader}: ${
-                team.members.find((m) => m.role === TeamRole.Leader)?.name ||
-                "尚未指派"
-              }`}
-            </span>
-            <span>
-              {`${TeamRole.Guide}: ${
-                team.members.find((m) => m.role === TeamRole.Guide)?.name ||
-                "尚未指派"
-              }`}
-            </span>
-            <span>
-              {`${TeamRole.StayBehind}: ${
-                team.members.find((m) => m.role === TeamRole.StayBehind)
-                  ?.name || "尚未指派"
-              }`}
-            </span>
-          </div>
+          {!editTeam ? (
+            <>
+              <p>
+                <span className="font-semibold">出隊時間：</span>
+                {typeof team.startDate === "string"
+                  ? team.startDate.split("T")[0]
+                  : team.startDate?.toLocaleDateString()}
+                {team.startDate !== team.endDate && " ~ "}
+                {team.startDate !== team.endDate &&
+                typeof team.endDate === "string"
+                  ? team.endDate.split("T")[0]
+                  : team.endDate?.toLocaleString()}
+              </p>
+              <p>
+                <span className="font-semibold">預備天：</span>
+                {team.prepareDate} 天
+              </p>
+              <p>
+                <span className="font-semibold">交通方式：</span>
+                {team.transportType.length > 0
+                  ? team.transportType.join(", ")
+                  : "尚未決定"}
+              </p>
+              <div className="flex justify-between w-2/3">
+                <span>
+                  {`${TeamRole.Leader}: ${
+                    team.members.find(
+                      (m) => m.role === parseEnumKey(TeamRole, TeamRole.Leader)
+                    )?.name || "尚未指派"
+                  }`}
+                  <div className="flex gap-x-2 items-center">
+                    <FaPhoneAlt className="size-3" />
+                    {team.members.find(
+                      (m) => m.role === parseEnumKey(TeamRole, TeamRole.Leader)
+                    )?.phone || "缺少聯絡電話"}
+                  </div>
+                </span>
+                <span>
+                  {`${TeamRole.Guide}: ${
+                    team.members.find(
+                      (m) => m.role === parseEnumKey(TeamRole, TeamRole.Guide)
+                    )?.name || "尚未指派"
+                  }`}
+                  <div className="flex gap-x-2 items-center">
+                    <FaPhoneAlt className="size-3" />
+                    {team.members.find(
+                      (m) => m.role === parseEnumKey(TeamRole, TeamRole.Guide)
+                    )?.phone || "缺少聯絡電話"}
+                  </div>
+                </span>
+                <span>
+                  {`${TeamRole.StayBehind}: ${
+                    team.members.find(
+                      (m) =>
+                        m.role === parseEnumKey(TeamRole, TeamRole.StayBehind)
+                    )?.name || "尚未指派"
+                  }`}
+                  <div className="flex gap-x-2 items-center">
+                    <FaPhoneAlt className="size-3" />
+                    {team.members.find(
+                      (m) =>
+                        m.role === parseEnumKey(TeamRole, TeamRole.StayBehind)
+                    )?.phone || "缺少聯絡電話"}
+                  </div>
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex flex-col w-full pr-10">
+                <InputComponent
+                  direction
+                  label="出發日期"
+                  value={
+                    typeof team.startDate === "string"
+                      ? team.startDate.split("T")[0]
+                      : team.startDate?.toLocaleDateString()
+                  }
+                  input={{ type: "date" }}
+                  inputChangeHandler={(v: string) =>
+                    setTeam({ ...team, startDate: v })
+                  }
+                />
+                <InputComponent
+                  direction
+                  label="結束日期"
+                  value={
+                    typeof team.endDate === "string"
+                      ? team.endDate.split("T")[0]
+                      : team.endDate?.toLocaleDateString()
+                  }
+                  input={{ type: "date" }}
+                  inputChangeHandler={(v: string) =>
+                    setTeam({ ...team, endDate: v })
+                  }
+                />
+                <InputComponent
+                  direction
+                  label="預備天"
+                  value={team.prepareDate}
+                  input={{ type: "number" }}
+                  inputChangeHandler={(v: string) =>
+                    setTeam({ ...team, prepareDate: Number(v) })
+                  }
+                />
+                <InputComponent
+                  direction
+                  label="交通方式"
+                  value={team.transportType}
+                  input={{
+                    type: "multicheckbox",
+                    value: Object.entries(TransportType).map(([key, value]) => {
+                      return {
+                        label: value,
+                        value: key,
+                      };
+                    }),
+                  }}
+                  inputChangeHandler={(v: string) => {
+                    setTeam({ ...team, transportType: JSON.parse(v) });
+                  }}
+                />
+                {[TeamRole.Leader, TeamRole.Guide, TeamRole.StayBehind].map(
+                  (role, idx) => (
+                    <div className="flex gap-x-1" key={idx}>
+                      <div className="flex-grow">
+                        <InputComponent
+                          direction
+                          label={role}
+                          placeholder={`輸入${role}名稱`}
+                          value={
+                            team.members.find(
+                              (m) => m.role === parseEnumKey(TeamRole, role)
+                            )?.name || ""
+                          }
+                          input={{ type: "text" }}
+                          inputChangeHandler={(v: string) => {
+                            if (team.members.some((m) => m.role === role)) {
+                              setTeam({
+                                ...team,
+                                members: team.members.map((m) =>
+                                  m.role === parseEnumKey(TeamRole, role)
+                                    ? { ...m, name: v }
+                                    : m
+                                ),
+                              });
+                            } else {
+                              setTeam({
+                                ...team,
+                                members: [
+                                  ...team.members,
+                                  {
+                                    name: v,
+                                    phone: "",
+                                    IDNumber: "",
+                                    studentNumber: "",
+                                    role,
+                                  },
+                                ],
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                      <InputComponent
+                        direction
+                        nolabel
+                        placeholder={`輸入${role}電話`}
+                        value={
+                          team.members.find(
+                            (m) => m.role === parseEnumKey(TeamRole, role)
+                          )?.phone || ""
+                        }
+                        input={{ type: "text" }}
+                        inputChangeHandler={(v: string) => {
+                          if (
+                            team.members.some(
+                              (m) => m.role === parseEnumKey(TeamRole, role)
+                            )
+                          ) {
+                            setTeam({
+                              ...team,
+                              members: team.members.map((m) =>
+                                m.role === parseEnumKey(TeamRole, role)
+                                  ? { ...m, phone: v }
+                                  : m
+                              ),
+                            });
+                          } else {
+                            setTeam({
+                              ...team,
+                              members: [
+                                ...team.members,
+                                {
+                                  name: "",
+                                  phone: v,
+                                  IDNumber: "",
+                                  studentNumber: "",
+                                  role,
+                                },
+                              ],
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  )
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         <div>

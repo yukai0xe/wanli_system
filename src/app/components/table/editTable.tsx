@@ -44,14 +44,13 @@ const EditableTable: React.FC<{
     dataSortingProp: RowData[];
     q: string;
 }> = ({ rowsSortingProp, dataSortingProp, q }) => {
-  const initialData: RowData[] = useMemo(() => dataSortingProp, []);
   const rowHeaders: RowHeader[] =
     rowsSortingProp
       .filter(
         (r) => r.key !== "id" && r.key !== "isLeader" && r.key !== "type"
       ) || [];
 
-  const [rowData, setRowData] = useState<RowData[]>(initialData);
+  const [rowData, setRowData] = useState<RowData[]>(dataSortingProp);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Partial<RowData>>({});
 
@@ -162,6 +161,10 @@ const EditableTable: React.FC<{
       return () => clearTimeout(timer);
     }
   }, [highlightedId]);
+
+  useEffect(() => {
+    setRowData(dataSortingProp);
+  }, [dataSortingProp])
 
   return (
     <div className="overflow-x-auto">

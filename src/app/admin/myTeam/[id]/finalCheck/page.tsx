@@ -1,12 +1,14 @@
 "use client";
 // import { useState, useEffect } from "react";
 import { usePlanTeamStore } from "@/state/planTeamStore";
+import { useDraftTeamMemberStore } from "@/state/teamMemberStore";
 import styles from "@/assets/styles/finalCheck.module.css"
 import { useState, useRef, useEffect } from "react";
 import TeamMember from "@/app/admin/TeamMember";
 import ItemList from "@/app/admin/ItemList";
-import { finalPlanType } from "@/types/enum";
+import { finalPlanType, TeamRole } from "@/types/enum";
 import { teamMemberFakeData as tmfake, personalIteamListFakeData as pitemfake } from "@/lib/viewModel/tableData";
+import { parseEnumKey } from "@/lib/utility";
 
 const tabs = Object.values(finalPlanType).map((type) => {
   return {
@@ -16,10 +18,12 @@ const tabs = Object.values(finalPlanType).map((type) => {
 });
 
 const Page = () => {
-  const team = usePlanTeamStore((state: PlanTeamState) => state.team);
+  const { setTeam, team } = usePlanTeamStore();
+  const { member } = useDraftTeamMemberStore();
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, x: 0 });
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const tabRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [teamMembers, setTeamMembers] = useState<RowData[]>([]);
 
   useEffect(() => {
     if (tabRefs.current[selectedTab]) {
@@ -36,11 +40,43 @@ const Page = () => {
     }
   }, [selectedTab, tabs]);
 
+  useEffect(() => {
+    if (team.members && team.members.length > 0) {
+      setTeamMembers(
+        team.members.map(({ role, birth, ...m }, idx) => {
+          return {
+            ...m,
+            id: idx,
+            birth: birth?.toLocaleString() || "",
+            isLeader: role !== parseEnumKey(TeamRole, TeamRole.NormalMember),
+          };
+        })
+      );
+    }
+  }, [team.members])
+
+  const teamMemberTableFeature = {
+    addNewMember: () => {
+      setTeam({
+        ...team,
+        members: [...team.members, { ...member }],
+      });
+    },
+    importNewMembers: () => {},
+    downloadExample: () => {},
+    exportMembersAsPDF: () => {},
+    exportMembersAsExcel: () => {}
+  }
+
   const renderTab = (id: number) => {
     switch (id) {
       case 0:
         return (
-          <TeamMember rowsProp={tmfake.rowsHeader} dataProp={tmfake.rowsData} />
+          <TeamMember
+            feature={teamMemberTableFeature}
+            rowsProp={tmfake.rowsHeader}
+            dataProp={teamMembers}
+          />
         );
       case 1:
       case 2:
@@ -48,7 +84,6 @@ const Page = () => {
     }
   }
 
-  console.log(team);
   return (
     <div className={`flex w-full flex-col justify-center items-center gap-y-5`}>
       <div

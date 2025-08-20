@@ -8,7 +8,7 @@ interface inputProps {
   nolabel?: boolean
   direction?: boolean
   input: InputObject
-  value?: string | boolean,
+  value?: string | boolean | number | string[],
   inputChangeHandler: (v: string) => void
 }
 
@@ -40,8 +40,40 @@ const renderInput = (item: inputProps) => {
           }
         />
       );
+    case "multicheckbox":
+      if (Array.isArray(item.input.value)) {
+        return (
+          <div
+            className="grid grid-cols-3 gap-x-5 gap-y-2"
+            
+          >
+            {item.input.value.map((i, idx) => (
+              <label key={idx} className="flex w-full gap-x-5">
+                <input
+                  name={item.name}
+                  type="checkbox"
+                  checked={
+                    Array.isArray(item.value) && item.value.includes(i.label)
+                  }
+                  onChange={(e) => {
+                    let newValues = Array.isArray(item.value)
+                      ? [...item.value]
+                      : [];
+                    if (e.currentTarget.checked) newValues.push(i.label);
+                    else newValues = newValues.filter((v) => v !== i.label);
+                    item.inputChangeHandler(JSON.stringify(newValues));
+                  }}
+                />
+                {i.label}
+              </label>
+            ))}
+          </div>
+        );
+      }
+      return null;
     case "date":
     case "text":
+    case "number":
       return (
         <input
           id={item.id}
@@ -77,7 +109,7 @@ const InputComponent = ({
             {label}
           </label>
         )}
-        <div className={`mt-2 ${nolabel ? "w-full" : "w-1/2"}`}>
+        <div className={`mt-2 ${nolabel ? "w-full" : "w-1/2 min-w-[150px] size-max"}`}>
           {renderInput({id, name, label, placeholder, input, value, inputChangeHandler})}
         </div>
       </div>

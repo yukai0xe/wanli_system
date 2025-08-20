@@ -8,12 +8,19 @@ declare global {
     type: FileType
   }
 
-  type InputObject = { type: "text"} | { type: "date"} | { type: "checkbox"} |
+  type InputObject = { type: "text"} | { type: "date"} | { type: "checkbox"} | { type: "number"} |
   {
     type: "select",
     value: {
         label: string,
         value: string  
+    }[]
+  } |
+  {
+    type: "multicheckbox",
+    value: {
+      label: string,
+      value: string
     }[]
   }
   
@@ -51,6 +58,18 @@ declare global {
     loading: boolean;
     setLoading: (loading: boolean) => void;
   }
+
+  type RowData = {
+    id: number;
+    [key: string]: number | string | boolean | undefined;
+  };
+  
+  type RowHeader = {
+    key: string;
+    label: string;
+    type: InputObject;
+    validate: (v: string) => boolean;
+  };
 }
 
 export { };

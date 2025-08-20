@@ -63,3 +63,27 @@ export enum finalPlanType {
 export enum FileType {
   firstMeeting = "行前會"
 }
+
+export enum TransportType {
+  motorcycle = "機車往返",
+  drive = "開車往返",
+  privateShuttlego = "包車前往",
+  privateShuttleBack = "包車返回",
+  publicShuttlego = "大眾交通前往",
+  publicShuttleBack = "大眾交通返回"
+}
+
+export enum MemberColumn {
+  name = "隊員姓名",
+  isLeader = "是否為幹部",
+  IDNumber = "身分證字號",
+  gender = "性別",
+  birth = "出生年月",
+  department = "系級",
+  studentId = "學號",
+  phone = "連絡電話",
+  email = "電子信箱",
+  address = "地址",
+  emergencyContact = "緊急連絡人",
+  emergencyPhone = "緊急連絡人電話",
+}

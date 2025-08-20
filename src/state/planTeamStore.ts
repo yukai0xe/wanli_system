@@ -52,7 +52,7 @@ export const usePlanTeamStore = create<PlanTeamState>()(
             })),
         setTeam: (team: Partial<PlanTeam>) =>
             set((state) => ({
-                team: { ...state.team, ...team } as PlanTeam,
+                team: { ...state.team, ...team, members: team.members ?? state.team.members } as PlanTeam,
             })),
         resetTeam: () => set({ id: null, team: initialTeam }),
         getTeamWithFetch: async (idParam: number) => {
