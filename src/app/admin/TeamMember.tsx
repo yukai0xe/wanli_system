@@ -32,7 +32,6 @@ const TeamMemberTable: React.FC<{
     addNewMember: () => void,
     importNewMembers: () => void,
     downloadExample: () => void,
-    exportMembersAsPDF: () => void,
     exportMembersAsExcel: () => void
   }
   allTeamMember?: boolean
@@ -100,10 +99,6 @@ const TeamMemberTable: React.FC<{
                       <button className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition">
                         <HiArrowDownTray className="size-6 hover:text-slate-700 transition" />
                         下載範例檔案
-                      </button>
-                      <button className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition">
-                        <HiArrowDownTray className="size-6 hover:text-slate-700 transition" />
-                        匯出人員名單 (.pdf)
                       </button>
                       <button className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition">
                         <HiArrowDownTray className="size-6 hover:text-slate-700 transition" />

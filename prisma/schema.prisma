@@ -147,6 +147,9 @@ model PlanTeam {
 
   members          Member[]
 
+  personalItems PersonalItemList[]
+  teamItems     TeamItemList[]
+
   planTeamMeta     PlanTeamMeta?
 
   createdAt       DateTime  @default(now())
@@ -186,5 +189,50 @@ model PlanTeamMeta {
   updatedAt    DateTime  @updatedAt
 
   @@map("plan_team_meta")
+  @@schema("public")
+}
+
+enum ItemType {
+  Technical     @map("技術裝備")
+  Cooking       @map("炊事裝備")
+  Camping       @map("營帳裝備")
+  Clothing      @map("服裝類")
+  PersonalEquip @map("個人裝備類")
+  Other         @map("其他")
+
+  @@schema("public")
+}
+
+model Item {
+  id          Int      @id @default(autoincrement())
+  name        String
+  weight      Float
+  type        ItemType
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@schema("public")
+}
+
+model PersonalItemList {
+  id        Int      @id @default(autoincrement())
+  teamId    Int
+  team      PlanTeam @relation(fields: [teamId], references: [id])
+  items     Json     // [{"id": item.id, "important": bool}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("public")
+}
+
+model TeamItemList {
+  id        Int      @id @default(autoincrement())
+  teamId    Int
+  team      PlanTeam @relation(fields: [teamId], references: [id])
+
+  items     Json     // [{"id": item.id, "count": number, "owner": member.id}]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@schema("public")
 }

@@ -8,12 +8,19 @@ import { teamMemberFakeData } from "@/lib/viewModel/tableData";
 const MainPage = () => {
   // const username = useUserStore((state: UserState) => state.username);
   const { rowsHeader, rowsData } = teamMemberFakeData;
+  const teamMemberTableFeature = {
+    addNewMember: () => {},
+    importNewMembers: () => {},
+    downloadExample: () => {},
+    exportMembersAsExcel: () => {},
+  };
+
   return (
     <div className={`flex w-full flex-col justify-center items-center gap-y-5`}>
       <div
         className={`w-full min-h-screen mb-10 flex justify-center items-center ${styles.contentContainer}`}
       >
-        <TeamMember rowsProp={rowsHeader} dataProp={rowsData} allTeamMember />
+        <TeamMember rowsProp={rowsHeader} dataProp={rowsData} allTeamMember feature={teamMemberTableFeature} />
       </div>
     </div>
   );

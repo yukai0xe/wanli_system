@@ -59,17 +59,25 @@ declare global {
     setLoading: (loading: boolean) => void;
   }
 
-  type RowData = {
-    id: number;
-    [key: string]: number | string | boolean | undefined;
-  };
-  
   type RowHeader = {
     key: string;
     label: string;
     type: InputObject;
+    calc?: [
+      {
+        label: string,
+        f: (data: RowData[]) => string
+      }
+    ] 
     validate: (v: string) => boolean;
-  };
+  }
+
+  type RowData = {
+    id: number;
+    [key: string]: number | string | boolean | undefined;
+  }
+
+  type groupData = Record<string, { data: RowData[]; isOpen: boolean }>;
 }
 
 export { };

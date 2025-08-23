@@ -153,7 +153,11 @@ const EditableTable: React.FC<{
               />
             );
         }
-    };
+  };
+  
+  const deleteHandler = (row: RowData) => {
+    setRowData((prev) => prev.filter((r) => r.id !== row.id));
+  }
 
   useEffect(() => {
     if (highlightedId != null) {
@@ -227,7 +231,7 @@ const EditableTable: React.FC<{
                             編輯
                           </button>
                           <button
-                            onClick={() => startEdit(row)}
+                            onClick={() => deleteHandler(row)}
                             className="rounded-xl border border-red-600 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
                           >
                             刪除

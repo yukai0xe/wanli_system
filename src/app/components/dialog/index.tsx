@@ -6,14 +6,14 @@ import {
 } from "@headlessui/react";
 
 const DialogComponent = ({ title, open, button, handleClose, handleConfirm, children }: {
-    title: string,
-    open: boolean,
-    handleClose: () => void,
-    handleConfirm: () => void,
-    children: React.ReactNode,
-    button: {
-      cancel: string,
-      confirm: string
+  title: string,
+  open: boolean,
+  handleClose: () => void,
+  handleConfirm: () => void,
+  children: React.ReactNode,
+  button: {
+    cancel: string,
+    confirm: string
     }
 }) => {
   return (

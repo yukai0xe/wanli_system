@@ -87,3 +87,27 @@ export enum MemberColumn {
   emergencyContact = "緊急連絡人",
   emergencyPhone = "緊急連絡人電話",
 }
+
+export enum PersonalItemType {
+  cooking = "炊事類",
+  camping = "營帳類",
+  clothing = "服裝類",
+  personalEquip = "個人裝備類",
+  other = "其他類"
+}
+
+export enum TeamItemType {
+  technical = "技術類",
+  cooking = "炊事類",
+  camping = "營帳類",
+  other = "其他類"
+}
+
+export enum ItemColumn {
+  name = "裝備名稱",
+  type = "裝備種類",
+  required = "是否必備",
+  weight = "重量",
+  quantity = "數量",
+  description = "裝備敘述"
+}

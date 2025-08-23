@@ -7,13 +7,16 @@ import { useState, useRef, useEffect } from "react";
 import TeamMember from "@/app/admin/TeamMember";
 import ItemList from "@/app/admin/ItemList";
 import { finalPlanType, TeamRole } from "@/types/enum";
-import { teamMemberFakeData as tmfake, personalIteamListFakeData as pitemfake } from "@/lib/viewModel/tableData";
+import {
+  teamMemberFakeData as tmfake,
+  personalIteamListFakeData as pitemfake,
+  teamItemListFakeData as titemfake
+} from "@/lib/viewModel/tableData";
 import { parseEnumKey } from "@/lib/utility";
 
 const tabs = Object.values(finalPlanType).map((type) => {
   return {
-    label: type,
-    active: [finalPlanType.teamMemberList, finalPlanType.personalItemList, finalPlanType.teamItemList].includes(type)
+    label: type
   };
 });
 
@@ -64,13 +67,17 @@ const Page = () => {
     },
     importNewMembers: () => {},
     downloadExample: () => {},
-    exportMembersAsPDF: () => {},
     exportMembersAsExcel: () => {}
   }
 
-  const renderTab = (id: number) => {
-    switch (id) {
-      case 0:
+  const itemsListTableFeature = {
+    addNewItems: () => { },
+    exportItemsAsDocs: () => {}
+  }
+
+  const renderTab = (label: string) => {
+    switch (label) {
+      case finalPlanType.teamMemberList:
         return (
           <TeamMember
             feature={teamMemberTableFeature}
@@ -78,16 +85,96 @@ const Page = () => {
             dataProp={teamMembers}
           />
         );
-      case 1:
-      case 2:
-        return <ItemList rowsProp={pitemfake.rowsHeader} dataProp={pitemfake.rowsData} />;
+      case finalPlanType.personalItemList:
+        return (
+          <ItemList
+            key="personal"
+            rowsProp={pitemfake.rowsHeader}
+            dataProp={pitemfake.rowsData}
+            feature={itemsListTableFeature}
+          />
+        );
+      case finalPlanType.teamItemList:
+        return (
+          <ItemList
+            key="team"
+            rowsProp={titemfake.rowsHeader}
+            dataProp={titemfake.rowsData}
+            feature={itemsListTableFeature}
+            isTeam
+          />
+        );
+      case finalPlanType.BPlan:
+        return (
+          <div className="w-full p-5 flex gap-y-5 flex-col justify-start">
+            <div className="w-full flex flex-col">
+              <label className="text-2xl mb-2">撤退計畫</label>
+              <textarea
+                className="p-3"
+                rows={20}
+                placeholder={"輸入你的撤退計畫"}
+              />
+            </div>
+            <div className="w-full flex flex-col">
+              <label className="text-2xl mb-2">拆隊計畫</label>
+              <textarea
+                className="p-3"
+                rows={20}
+                placeholder={"輸入你的拆隊計畫"}
+              />
+            </div>
+          </div>
+        );
+      case finalPlanType.map:
+        return (
+          <div className="w-full h-screen p-3">
+            <iframe
+              src="https://twmap.happyman.idv.tw/map/"
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              title="Taiwan Map"
+              loading="lazy"
+              sandbox="allow-scripts allow-same-origin"
+            />
+          </div>
+        );
+      case finalPlanType.other:
+        return (
+          <div className="w-full p-5 flex gap-y-5 flex-col justify-start">
+            {
+              ["水源", "交通", "訊號", "最近醫療站"].map((item, idx) => {
+                return (
+                  <div key={idx} className="w-full flex flex-col">
+                    <label className="text-2xl mb-2">{item}</label>
+                    <textarea
+                      className="p-3"
+                      rows={5}
+                      placeholder={`關於${item}`}
+                    />
+                  </div>
+                );
+              })
+            }
+          </div>
+        );
+      default:
+        return (
+          <div className="flex flex-col text-center gap-y-5 ">
+            <p className="text-5xl">{label}</p>
+            <p className="text-red-600 text-xl">尚未開放</p>
+          </div>
+        );
     }
   }
 
   return (
     <div className={`flex w-full flex-col justify-center items-center gap-y-5`}>
       <div
-        className={`${styles.tabContainer} flex w-full justify-center items-center gap-x-10 pl-5 pr-5 py-2`}
+        className={`${
+          styles.tabContainer
+        } flex w-full justify-center items-center gap-x-10 pl-5 pr-5 py-2  transition-transform duration-500
+        `}
       >
         {tabs.map((tab, idx) => {
           return (
@@ -117,13 +204,7 @@ const Page = () => {
       <div
         className={`w-full min-h-screen mb-10 flex justify-center items-center ${styles.contentContainer}`}
       >
-        { renderTab(selectedTab) }
-        {!tabs[selectedTab].active && (
-          <div className="flex flex-col text-center gap-y-5">
-            <p className="text-5xl">{tabs[selectedTab].label}</p>
-            <p className="text-red-600 text-xl">尚未開放</p>
-          </div>
-        )}
+        {renderTab(tabs[selectedTab].label)}
       </div>
     </div>
   );

@@ -1,82 +1,91 @@
 import React, { useState, useEffect } from "react";
 import EditableTable from "@/app/components/table/editTable";
-import { personalIteamListFakeData } from "@/lib/viewModel/tableData";
+import { personalIteamListFakeData as pItemfake, teamItemListFakeData as tItemfake } from "@/lib/viewModel/tableData";
 import {
   HiEllipsisHorizontal,
   HiSquaresPlus,
   HiArrowDownTray,
 } from "react-icons/hi2";
+import { AddNewItem } from "@/app/components/dialog/ItemDialog";
+import { useRouter } from "next/navigation";
+import { usePlanTeamStore } from "@/state/planTeamStore";
 
-type RowData = {
-  id: number;
-  [key: string]: number | string | boolean | undefined;
+
+const keyOrder = [...new Set([...pItemfake.keyOrder, ...tItemfake.keyOrder])];
+const sortHeaderRule = (data: RowHeader[]) => {
+  return keyOrder
+    .map((key) => data.find((h) => h.key === key))
+    .filter((h): h is RowHeader => !!h);
 };
-
-type RowHeader = {
-  key: string;
-  label: string;
-  type: InputObject;
-  validate: (v: string) => boolean;
+const sortDataRule = (data: RowData[]) => {
+  return data.map((row) => {
+    const sortedRow: RowData = { id: row.id };
+    keyOrder.forEach((key) => {
+      if (key in row) sortedRow[key] = row[key];
+    });
+    return sortedRow;
+  });
 };
-
-type groupDataType = Record<string, { data: RowData[]; isOpen: boolean }>;
 
 const TeamMemberTable: React.FC<{
+  isTeam?: boolean
   rowsProp: RowHeader[];
   dataProp: RowData[];
-}> = ({ rowsProp, dataProp }) => {
+  feature: {
+    addNewItems: () => void,
+    exportItemsAsDocs: () => void
+  }
+}> = ({ rowsProp, dataProp, feature, isTeam=false }) => {
   const [q, setQ] = useState("");
-  const [groupData, setGroupData] = useState<groupDataType>({});
-
-  const { keyOrder } = personalIteamListFakeData;
-
-  const sortHeaderRule = (data: RowHeader[]) => {
-    return keyOrder
-      .map((key) => data.find((h) => h.key === key))
-      .filter((h): h is RowHeader => !!h);
-  };
-  const sortDataRule = (data: RowData[]) => {
-    return data.map((row) => {
-      const sortedRow: RowData = { id: row.id };
-      keyOrder.forEach((key) => {
-        if (key in row) sortedRow[key] = row[key];
-      });
-      return sortedRow;
-    });
-  };
-
+  const [groupData, setGroupData] = useState<groupData>({});
   const rowsSortingProp = sortHeaderRule(rowsProp);
-  const dataSortingProp = sortDataRule(dataProp);
   const [showBtn, setShowBtn] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const router = useRouter();
+  const teamId = usePlanTeamStore((state) => state.id);
 
   useEffect(() => {
-    const gdata: groupDataType = {};
-    dataSortingProp.forEach((data) => {
-      if ("type" in data) {
-        const { type } = data;
-        if (typeof type === "string") {
-          if (!(type in gdata)) {
-            gdata[type] = {
-              data: [],
-              isOpen: true,
-            };
-          }
-          gdata[type].data.push(data);
+    const sortedData = sortDataRule(dataProp);
+    const gdata: groupData = {};
+    sortedData.forEach((data) => {
+      if ("type" in data && typeof data.type === "string") {
+        if (!(data.type in gdata)) {
+          gdata[data.type] = { data: [], isOpen: true };
         }
+        gdata[data.type].data.push(data);
       }
     });
+
     setGroupData(gdata);
-  }, []);
+  }, [dataProp]);
+
+  const openHandler = () => {
+    setShowBtn(false);
+    setOpen(true);
+  }
+  const closeHandler = () => {
+    setOpen(false);
+  }
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white p-6">
       <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* <h1 className="text-xl font-semibold tracking-tight">使用者清單</h1> */}
-          <div className="mt-4 text-xs text-gray-500">
-            提示：點左側「編輯」可對單列進行修改，完成後按「儲存」或「取消」。
+          <div className="w-1/2 flex items-end gap-x-2">
+            {isTeam && (
+              <button
+                className="px-3 py-1 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
+                onClick={() => router.push(`/admin/myTeam/${teamId}/finalCheck/allocation`)}
+              >
+                公裝分配
+              </button>
+            )}
+            <div className="mt-4 text-xs text-gray-500">
+              提示：點右側「三個點的符號」可以新增裝備
+            </div>
           </div>
-          <div className="w-2/3 flex items-center justify-end gap-2">
+          <div className="w-1/2 flex items-center justify-end gap-3">
             <div className="flex gap-x-3">
               <input
                 value={q}
@@ -93,15 +102,17 @@ const TeamMemberTable: React.FC<{
                 />
                 {showBtn && (
                   <div className="absolute top-10 right-0 flex flex-col gap-2 text-left w-64 bg-white rounded shadow-2xl">
-                    <button className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition">
+                    <button
+                      className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition"
+                      onClick={openHandler}
+                    >
                       <HiSquaresPlus className="size-6 hover:text-slate-700 transition" />
                       新增裝備
                     </button>
-                    <button className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition">
-                      <HiArrowDownTray className="size-6 hover:text-slate-700 transition" />
-                      匯出裝備清單 (.pdf)
-                    </button>
-                    <button className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition">
+                    <button
+                      className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition"
+                      onClick={feature.exportItemsAsDocs}
+                    >
                       <HiArrowDownTray className="size-6 hover:text-slate-700 transition" />
                       匯出裝備清單 (.docs)
                     </button>
@@ -140,10 +151,32 @@ const TeamMemberTable: React.FC<{
                   q={q}
                 />
               )}
+              <div className="flex justify-end">
+                {rowsSortingProp.map((r) =>
+                  r.calc
+                    ? r.calc.map((v) => (
+                        <span
+                          key={`${idx}-${key}`}
+                          className="text-sm text-gray-600"
+                        >
+                          {v.label}: {v.f(object.data)}
+                        </span>
+                      ))
+                    : null
+                )}
+              </div>
             </div>
           );
         })}
       </div>
+      {open && (
+        <AddNewItem
+          open={open}
+          isTeam={isTeam}
+          handleClose={closeHandler}
+          handleConfirm={feature.addNewItems}
+        />
+      )}
     </div>
   );
 };

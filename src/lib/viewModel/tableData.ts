@@ -2,17 +2,6 @@ import { parseEnumKey } from "@/lib/utility";
 import { Gender } from "@/types/enum";
 
 
-type RowHeader = {
-  key: string;
-  label: string;
-  type: InputObject;
-  validate: (v: string) => boolean;
-};
-
-type RowData = {
-  id: number;
-  [key: string]: number | string | boolean | undefined;
-};
 
 export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], keyOrder: string[]} = {
     rowsHeader: [
@@ -350,3 +339,70 @@ export const personalIteamListFakeData: { rowsHeader: RowHeader[], rowsData: Row
   ]
 }
 
+export const teamItemListFakeData: { rowsHeader: RowHeader[], rowsData: RowData[], keyOrder: string[] } = {
+  rowsHeader: [
+    {
+      key: "type",
+      label: "種類",
+      type: { type: "text" },
+      validate: (v: string) => v.length > 0,
+    },
+    {
+      key: "name",
+      label: "裝備名稱",
+      type: { type: "text" },
+      validate: (v: string) => v.length > 0,
+    },
+    {
+      key: "quantity",
+      label: "數量",
+      type: { type: "number" },
+      validate: (v: string) => !isNaN(Number(v)) && Number(v) >= 0,
+    },
+    {
+      key: "weight",
+      label: "重量(克)",
+      type: { type: "number" },
+      calc: [
+          {
+            label: "總重量",
+            f: (data: RowData[]) => {
+              return data.reduce((sum: number, row: RowData) => sum + Number(row.weight || 0), 0).toString() + "g"
+            }
+          }
+        ],
+      validate: (v: string) => !isNaN(Number(v)) && Number(v) >= 0,
+    },
+  ],
+  rowsData: [
+    // 技術裝備
+    { id: 1, type: "技術裝備", name: "安全帽", quantity: "1", weight: "350" },
+    { id: 2, type: "技術裝備", name: "安全吊帶", quantity: "1", weight: "600" },
+    { id: 3, type: "技術裝備", name: "主繩", quantity: "1", weight: "2500" },
+    { id: 4, type: "技術裝備", name: "快扣", quantity: "4", weight: "200" },
+    { id: 5, type: "技術裝備", name: "上升器", quantity: "1", weight: "250" },
+    { id: 6, type: "技術裝備", name: "下降器", quantity: "1", weight: "200" },
+
+    // 炊事裝備
+    { id: 7, type: "炊事裝備", name: "瓦斯爐", quantity: "1", weight: "350" },
+    { id: 8, type: "炊事裝備", name: "瓦斯罐", quantity: "2", weight: "500" },
+    { id: 9, type: "炊事裝備", name: "湯鍋", quantity: "1", weight: "700" },
+    { id: 10, type: "炊事裝備", name: "炒鍋", quantity: "1", weight: "800" },
+    { id: 11, type: "炊事裝備", name: "餐具組", quantity: "4", weight: "300" },
+    { id: 12, type: "炊事裝備", name: "濾水袋", quantity: "1", weight: "150" },
+
+    // 營帳裝備
+    { id: 13, type: "營帳裝備", name: "帳篷外帳", quantity: "1", weight: "1500" },
+    { id: 14, type: "營帳裝備", name: "帳篷內帳", quantity: "1", weight: "1200" },
+    { id: 15, type: "營帳裝備", name: "營柱", quantity: "1", weight: "800" },
+    { id: 16, type: "營帳裝備", name: "地布", quantity: "1", weight: "500" },
+    { id: 17, type: "營帳裝備", name: "營釘", quantity: "10", weight: "400" },
+    { id: 18, type: "營帳裝備", name: "風繩", quantity: "6", weight: "300" },
+  ],
+  keyOrder: [
+    "type",
+    "name",
+    "quantity",
+    "weight"
+  ]
+}

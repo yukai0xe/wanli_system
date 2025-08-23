@@ -166,6 +166,8 @@ const DashboardLayout = ({
   const id = usePlanTeamStore((state) => state.id);
   const [title, setTitle] = useState<string>("");
   const [isFold, setIsFold] = useState<boolean>(false);
+  const [showLeftSide, setShowLeftSide] = useState<boolean>(true);
+
   useEffect(() => {
     const newBars = Array.from({ length: 5 }).map(() => {
       const height = Math.floor(Math.random() * 6) + 10; // 10 ~ 20
@@ -198,6 +200,14 @@ const DashboardLayout = ({
           setTitle(`${teamPrefix} 留守計劃書`);
           break;
       }
+    }
+
+    const lastEndpoint = pathname.pop();
+    console.log(lastEndpoint);
+    if (lastEndpoint === "allocation") {
+      setShowLeftSide(false);
+    } else {
+      setShowLeftSide(true);
     }
       
   }, [pathname, team])
@@ -234,67 +244,70 @@ const DashboardLayout = ({
               />
             )}
             {pathname.length > 3 && team != null && (
-              <FaGear title="隊伍設定" className="size-10 cursor-pointer hover:rotate-90 transition p-2 duration-1000" />
+              <FaGear
+                title="隊伍設定"
+                className="size-10 cursor-pointer hover:rotate-90 transition p-2 duration-1000"
+              />
             )}
           </div>
         </div>
       </div>
-      <aside
-        className={`${
-          styles.containerAside
-        } w-[200px] absolute h-full transition-transform duration-200 ease-in-out shrink-0 ${
-          isFold ? "-translate-x-[80%]" : "translate-x-0"
-        }`}
-      >
-        <div className={styles.decorationBarContainer}>
-          {bars.length === 0
-            ? null
-            : bars.map(({ width, height }, idx) => (
+      {showLeftSide && (
+        <aside
+          className={`${styles.containerAside
+            } w-[200px] absolute h-full transition-transform duration-200 ease-in-out shrink-0 ${isFold ? "-translate-x-[80%]" : "translate-x-0"
+            }`}
+        >
+          <div className={styles.decorationBarContainer}>
+            {bars.length === 0
+              ? null
+              : bars.map(({ width, height }, idx) => (
                 <div
                   key={idx}
-                  className={`${styles.decorationBar} ${
-                    idx % 2 === 0 ? styles.odd : styles.even
-                  }`}
+                  className={`${styles.decorationBar} ${idx % 2 === 0 ? styles.odd : styles.even
+                    }`}
                   style={{ width: `${width}px`, height: `${height}px` }}
                 ></div>
               ))}
-        </div>
-        <div className="relative w-full">
-          <ul className={styles.asideList}>
-            {navberModel.map((item) => {
-              const isActive = item.path
-                .split("/")
-                .every((val, idx) => val === pathname[idx]);
-              return (
-                <Link key={item.id} href={item.path}>
-                  <li
-                    className={`${styles.asideListItem} ${
-                      isActive ? styles.click : ""
-                    }`}
-                  >
-                    {renderIcon(item.id)}
-                    {item.displayText}
-                  </li>
-                </Link>
-              );
-            })}
-            {isFold ? (
-              <HiArrowRight
-                onClick={() => setIsFold(!isFold)}
-                className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer hover:text-gray-200 hover:translate-x-1 p-2 transition"
-              />
-            ) : (
-              <HiArrowLeft
-                onClick={() => setIsFold(!isFold)}
-                className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer hover:text-gray-200 hover:-translate-x-1 p-2 transition"
-              />
-            )}
-          </ul>
-        </div>
-      </aside>
+          </div>
+          <div className="relative w-full">
+            <ul className={styles.asideList}>
+              {navberModel.map((item) => {
+                const isActive = item.path
+                  .split("/")
+                  .every((val, idx) => val === pathname[idx]);
+                return (
+                  <Link key={item.id} href={item.path}>
+                    <li
+                      className={`${styles.asideListItem} ${isActive ? styles.click : ""
+                        }`}
+                    >
+                      {renderIcon(item.id)}
+                      {item.displayText}
+                    </li>
+                  </Link>
+                );
+              })}
+              {
+                (isFold ? (
+                  <HiArrowRight
+                    onClick={() => setIsFold(false)}
+                    className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:bg-gray-700 hover:text-gray-200 hover:translate-x-1"
+                  />
+                ) : (
+                  <HiArrowLeft
+                    onClick={() => setIsFold(true)}
+                    className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:bg-gray-700 hover:text-gray-200 hover:-translate-x-1"
+                  />
+                ))
+              }
+            </ul>
+          </div>
+        </aside>
+      )}
       <main
         className={`flex-1 overflow-y-scroll transition-ml duration-200 ease-in-out ${
-          !isFold ? "ml-[200px]" : "ml-[60px]"
+          showLeftSide ? (!isFold ? "ml-[200px]" : "ml-[60px]") : ""
         }`}
         style={{ marginTop: "50px" }}
       >
