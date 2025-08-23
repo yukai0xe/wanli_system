@@ -1,8 +1,9 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const LoginPage = () => {
   const [username, setUserName] = useState("");
@@ -10,7 +11,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const reason = searchParams.get("reason");
+  const reason = searchParams.get('reason');
 
   useEffect(() => {
     const checkSession = async () => {
@@ -61,33 +62,31 @@ const LoginPage = () => {
   };
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-4xl font-bold">山社管理系統</h1>
-        <form className="mt-4 flex flex-col">
-          <input
-            type="text"
-            placeholder="輸入名稱"
-            onChange={(e) => setUserName(e.target.value)}
-            className="border p-2 rounded mb-2"
-          />
-          <input
-            type="password"
-            placeholder="輸入密碼"
-            onChange={(e) => setPassword(e.target.value)}
-            className="border p-2 rounded mb-4"
-          />
-          <button
-            type="button"
-            className="bg-blue-500 text-white p-2 rounded"
-            onClick={handleAuth}
-            disabled={isLoading}
-          >
-            {isLoading ? "處理中..." : "登入"}
-          </button>
-        </form>
-      </div>
-    </Suspense>
+    <div className="flex flex-col items-center justify-center h-screen">
+      <h1 className="text-4xl font-bold">山社管理系統</h1>
+      <form className="mt-4 flex flex-col">
+        <input
+          type="text"
+          placeholder="輸入名稱"
+          onChange={(e) => setUserName(e.target.value)}
+          className="border p-2 rounded mb-2"
+        />
+        <input
+          type="password"
+          placeholder="輸入密碼"
+          onChange={(e) => setPassword(e.target.value)}
+          className="border p-2 rounded mb-4"
+        />
+        <button
+          type="button"
+          className="bg-blue-500 text-white p-2 rounded"
+          onClick={handleAuth}
+          disabled={isLoading}
+        >
+          {isLoading ? "處理中..." : "登入"}
+        </button>
+      </form>
+    </div>
   );
 };
 

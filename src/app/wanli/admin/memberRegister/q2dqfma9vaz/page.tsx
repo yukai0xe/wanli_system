@@ -7,7 +7,6 @@ const LoginPage = () => {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [reason, setReason] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -49,14 +48,12 @@ const LoginPage = () => {
        const email = `${username.trim()}@wanli.student.com`;
 
         if(validateRegister()) {
-            const { data, error } = await supabase.auth.signUp({
-                email, password
+            const { error } = await supabase.auth.signUp({
+              email, password
             });
-            console.log("auth.uid", data.user);
             if (error) alert(error.message);
             else {
-                alert("註冊成功！");
-                setIsLogin(true);
+              alert("註冊成功！");
             }
         }
 
@@ -81,14 +78,12 @@ const LoginPage = () => {
           onChange={(e) => setPassword(e.target.value)}
           className="border p-2 rounded mb-4"
         />
-        {!isLogin && (
-          <input
-            type="text"
-            placeholder="申請原因"
-            onChange={(e) => setReason(e.target.value)}
-            className="border p-2 rounded mb-4"
-          />
-        )}
+        <input
+          type="text"
+          placeholder="申請原因"
+          onChange={(e) => setReason(e.target.value)}
+          className="border p-2 rounded mb-4"
+        />
         <button
             type="button"
             className="bg-blue-500 text-white p-2 rounded"

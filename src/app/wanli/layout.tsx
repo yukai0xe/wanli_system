@@ -1,5 +1,6 @@
 import Navbar from "@/app/components/navbar";
 import Footer from "@/app/components/footer";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -8,12 +9,12 @@ export default function RootLayout({
 }>) {
 
   return (
-    <>
+    <Suspense>
       <Navbar />
       <div style={{ paddingTop: '100px' }}>
         {children}
       </div>
       <Footer />
-    </>
+    </Suspense>
   );
 }
