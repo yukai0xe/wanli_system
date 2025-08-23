@@ -1,11 +1,9 @@
-import { loadTeams } from "@/lib/team";
 import Image from "next/image"
-import Default from "@/assets/images/2.jpg"
 import { Button1 } from "@/app/components/button"
 import CommonLayout from "@/app/layout/commonLayout";
 import { WanliLink } from "@/app/wanli/page";
 
-const TeamView = ({ team }: { team: team.TeamType }) => {
+const TeamView = ({ team }: { team: Team }) => {
     const date = team.date.getFullYear() + "/" + (team.date.getMonth() < 10 && "0") + (team.date.getMonth() + 1) + "/" + (team.date.getMonth() < 10 && "0") + team.date.getDate();
 
     return (
@@ -44,18 +42,7 @@ const TeamView = ({ team }: { team: team.TeamType }) => {
 }
 
 const Team = async () => {
-    const data = await loadTeams();
-    const teams = data.map((team) => {
-        return {
-            id: team.id,
-            name: team.name,
-            tags: ["tags1", "tags2"],
-            content: team.content,
-            date: new Date(team.date),
-            count: team.teamsize,
-            image: team.image || Default,
-        }
-    });
+    const teams: Team[] = []
 
     return (
         <CommonLayout title="隊伍回顧">
