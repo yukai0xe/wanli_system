@@ -132,6 +132,13 @@ const DashboardLayout = ({
   const [bars, setBars] = useState<{ width: number; height: number }[]>([]);
   const router = useRouter();
   const pathname = usePathname().split("/");
+  const lastPathname = pathname.pop();
+  const username = useUserStore((state) => state.username);
+  const team = usePlanTeamStore((state) => state.team);
+  const teamId = usePlanTeamStore((state) => state.id);
+  const [title, setTitle] = useState<string>("");
+  const [isFold, setIsFold] = useState<boolean>(false);
+  const [showLeftSide, setShowLeftSide] = useState<boolean>(true);
   const navberModel = [
     {
       id: 1,
@@ -150,6 +157,29 @@ const DashboardLayout = ({
     },
   ];
 
+  const teamLeftBarModel = [
+    {
+      id: 1,
+      displayText: "隊伍首頁",
+      path: prefixUrl + "/myTeam/"
+    },
+    {
+      id: 2,
+      displayText: "行前會模板",
+      path: prefixUrl + "/myTeam/" + teamId + "/firstMeeting"
+    },
+    {
+      id: 3,
+      displayText: "留守計劃書",
+      path: prefixUrl + "/myTeam/" + teamId + "/finalCheck"
+    },
+    {
+      id: 4,
+      displayText: "公裝分配",
+      path: prefixUrl + "/myTeam/" + teamId + "/finalCheck/allocation"
+    }
+  ];
+
   const renderIcon = (id: number) => {
     switch (id) {
       case 1:
@@ -160,13 +190,6 @@ const DashboardLayout = ({
         return <FaFileInvoice className="size-8" />;
     }
   }
-
-  const username = useUserStore((state) => state.username);
-  const team = usePlanTeamStore((state) => state.team);
-  const id = usePlanTeamStore((state) => state.id);
-  const [title, setTitle] = useState<string>("");
-  const [isFold, setIsFold] = useState<boolean>(false);
-  const [showLeftSide, setShowLeftSide] = useState<boolean>(true);
 
   useEffect(() => {
     const newBars = Array.from({ length: 5 }).map(() => {
@@ -182,11 +205,11 @@ const DashboardLayout = ({
     if (team.startDate !== team.endDate) teamPrefix = `${String(team.startDate).split("T")[0]} ~ ${String(team.endDate).split("T")[0]} ${team.mainName}`;
     else teamPrefix = `${String(team.startDate).split("T")[0]} ${team.mainName}`;
 
-    if (/^\d+$/.test(pathname[pathname.length - 1])) {
+    if (lastPathname && /^\d+$/.test(lastPathname)) {
       if (team.startDate !== team.endDate) setTitle(`${teamPrefix} 出隊紀錄`);
       else setTitle(`${teamPrefix} 出隊紀錄`);
     } else {
-      switch (pathname[pathname.length - 1]) {
+      switch (lastPathname) {
         case "myTeam":
           setTitle(`${username} 的所有隊伍`);
           break;
@@ -206,17 +229,28 @@ const DashboardLayout = ({
     }
 
     if (pathname.length > 3) {
+      setIsFold(true);
       setShowLeftSide(false);
     } else {
       setShowLeftSide(true);
     }
-      
-  }, [pathname, team])
+  }, [lastPathname, team])
 
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div className={`${styles.quickLinkContainer}`}>
-        <div className={`${showLeftSide ? "w-5/6" : "w-full"} flex justify-end items-center`}>
+        <div
+          className={`${
+            showLeftSide ? "w-5/6" : "w-full"
+          } flex justify-end items-center`}
+        >
+          {pathname.length > 3 && (
+            <MdListAlt
+              onClick={() => setIsFold(false)}
+              title={"展開左側導覽列"}
+              className="size-10 cursor-pointer hover:bg-yellow-100 rounded p-2 transition"
+            />
+          )}
           <span className="mr-auto ml-5">{title}</span>
           <div className="flex gap-x-2 items-center">
             <span>歡迎~ {username}</span>
@@ -235,15 +269,6 @@ const DashboardLayout = ({
               title="回到首頁"
               className="size-10 cursor-pointer hover:bg-yellow-100 rounded p-2 transition"
             />
-            {pathname.length > 4 && (
-              <MdListAlt
-                onClick={() => {
-                  router.push(`/admin/myTeam/${id}`);
-                }}
-                title={"返回概覽"}
-                className="size-10 cursor-pointer hover:bg-yellow-100 rounded p-2 transition"
-              />
-            )}
             {pathname.length > 3 && team != null && (
               <FaGear
                 title="隊伍設定"
@@ -253,23 +278,26 @@ const DashboardLayout = ({
           </div>
         </div>
       </div>
-      {showLeftSide && (
+      {showLeftSide ? (
         <aside
-          className={`${styles.containerAside
-            } w-[200px] absolute h-full transition-transform duration-200 ease-in-out shrink-0 ${isFold ? "-translate-x-[80%]" : "translate-x-0"
-            }`}
+          className={`${
+            styles.containerAside
+          } w-[200px] absolute h-full transition-transform duration-200 ease-in-out shrink-0 ${
+            isFold ? "-translate-x-[80%]" : "translate-x-0"
+          }`}
         >
           <div className={styles.decorationBarContainer}>
             {bars.length === 0
               ? null
               : bars.map(({ width, height }, idx) => (
-                <div
-                  key={idx}
-                  className={`${styles.decorationBar} ${idx % 2 === 0 ? styles.odd : styles.even
+                  <div
+                    key={idx}
+                    className={`${styles.decorationBar} ${
+                      idx % 2 === 0 ? styles.odd : styles.even
                     }`}
-                  style={{ width: `${width}px`, height: `${height}px` }}
-                ></div>
-              ))}
+                    style={{ width: `${width}px`, height: `${height}px` }}
+                  ></div>
+                ))}
           </div>
           <div className="relative w-full">
             <ul className={styles.asideList}>
@@ -280,8 +308,9 @@ const DashboardLayout = ({
                 return (
                   <Link key={item.id} href={item.path}>
                     <li
-                      className={`${styles.asideListItem} ${isActive ? styles.click : ""
-                        }`}
+                      className={`${styles.asideListItem} ${
+                        isActive ? styles.click : ""
+                      }`}
                     >
                       {renderIcon(item.id)}
                       {item.displayText}
@@ -289,21 +318,50 @@ const DashboardLayout = ({
                   </Link>
                 );
               })}
-              {
-                (isFold ? (
-                  <HiArrowRight
-                    onClick={() => setIsFold(false)}
-                    className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:bg-gray-700 hover:text-gray-200 hover:translate-x-1"
-                  />
-                ) : (
-                  <HiArrowLeft
-                    onClick={() => setIsFold(true)}
-                    className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:bg-gray-700 hover:text-gray-200 hover:-translate-x-1"
-                  />
-                ))
-              }
+              {isFold ? (
+                <HiArrowRight
+                  onClick={() => setIsFold(false)}
+                  className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:bg-gray-700 hover:text-gray-200 hover:translate-x-1"
+                />
+              ) : (
+                <HiArrowLeft
+                  onClick={() => setIsFold(true)}
+                  className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:bg-gray-700 hover:text-gray-200 hover:-translate-x-1"
+                />
+              )}
             </ul>
           </div>
+        </aside>
+      ) : (
+        <aside
+          className={`${
+            styles.containerAside
+          } w-[200px] absolute h-full transition-transform duration-200 ease-in-out shrink-0 ${
+            isFold ? "-translate-x-[100%]" : "translate-x-0"
+          }`}
+        >
+          <ul className="w-full flex flex-col gap-1">
+            {teamLeftBarModel.map((item) => {
+              return (
+                <li key={item.id}>
+                  <Link
+                    href={item.path}
+                    className={`flex items-center justify-center h-[60px] text-2xl text-white rounded-md transition hover:bg-rose-900 hover:scale-[0.90]
+                      ${lastPathname === item.path.split('/').pop() ? "scale-[0.95] bg-rose-950" : ""}`}
+                  >
+                    {item.displayText}
+                  </Link>
+                </li>
+              );
+            })}
+
+            <li className="flex justify-end mt-2">
+              <HiArrowLeft
+                  onClick={() => setIsFold((prev) => !prev)}
+                className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:-translate-x-1"
+              />
+            </li>
+          </ul>
         </aside>
       )}
       <main

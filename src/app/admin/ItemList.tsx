@@ -62,10 +62,11 @@ const ItemListTable: React.FC<{
 
 
   useEffect(() => {
-    const gdata: groupData = {};
     async function fetchData() {
       setLoading(true);
+      const gdata: groupData = {};
       const rowData = isTeam ? await getTeamItemList() : await getPersonalItemList();
+      console.log(rowData);
       const sortedData = sortDataRule(rowData);
       sortedData.forEach((data) => {
         if ("type" in data && (typeof data.type === "string" || typeof data.type === "number")) {
@@ -79,7 +80,7 @@ const ItemListTable: React.FC<{
       setLoading(false);
     }
     fetchData();
-  }, [personalItemList, teamItemList]);
+  }, [personalItemList, teamItemList, isTeam]);
 
   const openHandler = (type: string) => {
     setShowBtn(false);
