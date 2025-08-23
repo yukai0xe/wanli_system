@@ -4,7 +4,7 @@ import ItemService from '@/lib/service/itemService';
 export async function POST(request: Request) {
   try {
     await authenticate(request);
-    const { idArray } = await request.json() as { idArray: number[] };
+    const { idArray } = await request.json() as { idArray: string[] };
 
     if (!idArray || !Array.isArray(idArray)) {
       return new Response(

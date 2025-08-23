@@ -9,6 +9,7 @@ import {
   closestCenter,
 } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+import type { DragEndEvent } from "@dnd-kit/core";
 
 type Equipment = { id: string; name: string; weight: number };
 
@@ -42,57 +43,57 @@ export default function AllocationPage() {
     const [splitItem, setSplitItem] = useState<Equipment | null>(null);
     const [memberId, setMemberId] = useState<string | null>(null);
 
-    const handleDragEnd = (event: any) => {
-        const { active, over } = event;
-        if (!over) return;
+    const handleDragEnd = (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over) return;
 
-        const itemId = active.id;
-        const sourceMemberId = active.data.current?.memberId || null;
-        const targetMemberId = over.data.current?.memberId || null;
+      const itemId = active.id;
+      const sourceMemberId = active.data.current?.memberId || null;
+      const targetMemberId = over.data.current?.memberId || null;
 
-        let movedItem: Equipment | null = null;
+      let movedItem: Equipment | null = null;
 
-        // 移除原來的地方
-        if (sourceMemberId) {
+      // 移除原來的地方
+      if (sourceMemberId) {
         setMembers((prev) =>
-            prev.map((m) => {
+          prev.map((m) => {
             if (m.id === sourceMemberId) {
-                const idx = m.items.findIndex((i) => i.id === itemId);
-                if (idx >= 0) {
+              const idx = m.items.findIndex((i) => i.id === itemId);
+              if (idx >= 0) {
                 movedItem = m.items[idx];
                 const newItems = [...m.items];
                 newItems.splice(idx, 1);
                 return { ...m, items: newItems };
-                }
+              }
             }
             return m;
-            })
+          })
         );
-        } else {
-            const idx = equipment.findIndex((e) => e.id === itemId);
-            if (idx >= 0) {
-                movedItem = equipment[idx];
-                setEquipment((prev) => prev.filter((e) => e.id !== itemId));
-            }
+      } else {
+        const idx = equipment.findIndex((e) => e.id === itemId);
+        if (idx >= 0) {
+          movedItem = equipment[idx];
+          setEquipment((prev) => prev.filter((e) => e.id !== itemId));
         }
+      }
 
-        // 拖到成員
-        if (targetMemberId && movedItem) {
-            setMembers((prev) =>
-                prev.map((m) =>
-                m.id === targetMemberId
-                    ? { ...m, items: [...m.items, movedItem!] }
-                    : m
-                )
-            );
-        }
+      // 拖到成員
+      if (targetMemberId && movedItem) {
+        setMembers((prev) =>
+          prev.map((m) =>
+            m.id === targetMemberId
+              ? { ...m, items: [...m.items, movedItem!] }
+              : m
+          )
+        );
+      }
 
-        // 拖回裝備清單
-        if (over.id === "equipmentList" && movedItem) {
-            setEquipment((prev) => [...prev, movedItem!]);
-        }
+      // 拖回裝備清單
+      if (over.id === "equipmentList" && movedItem) {
+        setEquipment((prev) => [...prev, movedItem!]);
+      }
 
-        setDragItem(null);
+      setDragItem(null);
     };
 
     const closeHandler = () => {

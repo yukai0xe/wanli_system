@@ -1,6 +1,13 @@
-export function parseEnumKey<T>(enumObj: T, value: any): keyof T {
-  const key = (Object.entries(enumObj) as [keyof T, any][]).find(([, val]) => val === value)?.[0];
-  if (!key) throw new Error(`Value ${value} not found in enum`);
+export function parseEnumKey<T extends Record<string, string | number>>(
+  enumObj: T,
+  value: string | number
+): keyof T {
+  const key = (Object.entries(enumObj) as [keyof T, string | number][]).find(
+    ([, val]) => val === value
+  )?.[0];
+  if (!key) {
+    throw new Error(`Value ${value} not found in enum`);
+  }
   return key;
 }
 

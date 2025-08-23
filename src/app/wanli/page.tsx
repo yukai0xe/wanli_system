@@ -73,7 +73,7 @@ const AboutView = () => {
 }
 
 const TeamView = () => {
-  const [teams, setTeams] = useState<CardType[]>([]);
+  const [teams,] = useState<CardType[]>([]);
   
   // useEffect(() => {
   //   const fetchData = async () => {
