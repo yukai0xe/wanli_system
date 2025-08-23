@@ -3,8 +3,6 @@ import { devtools } from "zustand/middleware";
 
 export const useFinalCheckStore = create<finalCheckState>()(
     devtools((set) => ({
-        personalItemList: {} as groupData,
-        teamItemList: {} as groupData,
         supply: undefined,
         route: undefined,
         referenceRoute: undefined,

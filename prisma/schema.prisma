@@ -204,7 +204,7 @@ enum ItemType {
 }
 
 model Item {
-  id          Int      @id @default(autoincrement())
+  id          String      @id
   name        String
   weight      Float
   type        ItemType
@@ -215,7 +215,7 @@ model Item {
 }
 
 model PersonalItemList {
-  id        Int      @id @default(autoincrement())
+  id        String       @id
   teamId    Int
   team      PlanTeam @relation(fields: [teamId], references: [id])
   items     Json     // [{"id": item.id, "important": bool}]
@@ -226,11 +226,11 @@ model PersonalItemList {
 }
 
 model TeamItemList {
-  id        Int      @id @default(autoincrement())
+  id        String       @id
   teamId    Int
   team      PlanTeam @relation(fields: [teamId], references: [id])
 
-  items     Json     // [{"id": item.id, "count": number, "owner": member.id}]
+  items     Json     // [{"id": item.id, "quantity": number, "ownerId": member.id}]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

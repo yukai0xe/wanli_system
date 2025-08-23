@@ -199,12 +199,13 @@ const DashboardLayout = ({
         case "finalCheck":
           setTitle(`${teamPrefix} 留守計劃書`);
           break;
+        case "allocation":
+          setTitle(`${teamPrefix} 公裝分配`);
+          break;
       }
     }
 
-    const lastEndpoint = pathname.pop();
-    console.log(lastEndpoint);
-    if (lastEndpoint === "allocation") {
+    if (pathname.length > 3) {
       setShowLeftSide(false);
     } else {
       setShowLeftSide(true);
@@ -215,7 +216,7 @@ const DashboardLayout = ({
   return (
     <div className="flex h-screen overflow-hidden relative">
       <div className={`${styles.quickLinkContainer}`}>
-        <div className="w-5/6 flex justify-end items-center">
+        <div className={`${showLeftSide ? "w-5/6" : "w-full"} flex justify-end items-center`}>
           <span className="mr-auto ml-5">{title}</span>
           <div className="flex gap-x-2 items-center">
             <span>歡迎~ {username}</span>

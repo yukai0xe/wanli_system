@@ -59,21 +59,25 @@ declare global {
     setLoading: (loading: boolean) => void;
   }
 
-  type RowHeader = {
+  interface RowHeader {
     key: string;
     label: string;
-    type: InputObject;
     calc?: [
       {
         label: string,
         f: (data: RowData[]) => string
       }
     ] 
+  }
+
+  interface EditableRowHeader extends RowHeader {
+    edit: boolean;
+    type: InputObject;
     validate: (v: string) => boolean;
   }
 
-  type RowData = {
-    id: number;
+  interface RowData {
+    id: string;
     [key: string]: number | string | boolean | undefined;
   }
 

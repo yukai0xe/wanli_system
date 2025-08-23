@@ -3,7 +3,7 @@ import { Gender } from "@/types/enum";
 
 
 
-export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], keyOrder: string[]} = {
+export const teamMemberFakeData: {rowsHeader: EditableRowHeader[], rowsData: RowData[], keyOrder: string[]} = {
     rowsHeader: [
     {
     key: "studentNumber",
@@ -11,6 +11,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!v) {
         alert("學號不能為空或空白");
@@ -25,6 +26,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: false,
     validate: (v: string) => {
       if (!v.trim()) {
         alert("隊員姓名不能為空或空白");
@@ -39,6 +41,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!/^[A-Z]\d{9}$/.test(v)) {
         alert("身分證格式不正確");
@@ -57,6 +60,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
             { label: "女", value: parseEnumKey(Gender, "女")?.toString() || "" }
         ]
     },
+    edit: true,
     validate: (v: string) => {
       if (!Object.keys(Gender).includes(v)) {
         alert("性別必須為男或女");
@@ -71,6 +75,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
       type: "date"
     },
+    edit: true,
     validate: (v: string) => {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) {
         alert("生日格式必須為 YYYY-MM-DD");
@@ -85,6 +90,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!v.trim()) {
         alert("系級不能為空");
@@ -99,6 +105,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!/^\d{8,10}$/.test(v)) {
         alert("電話格式不正確");
@@ -113,6 +120,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
         alert("email 格式不正確");
@@ -127,6 +135,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!v.trim()) {
         alert("緊急聯絡人不能為空");
@@ -141,6 +150,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!/^\d{8,10}$/.test(v)) {
         alert("緊急電話格式不正確");
@@ -155,6 +165,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     type: {
         type: "text"
     },
+    edit: true,
     validate: (v: string) => {
       if (!v) {
         alert("地址不能為空或空白");
@@ -164,128 +175,7 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     },
    },
     ],
-    rowsData: [
-        {
-            id: 1,
-            studentNumber: "S1001",
-            name: "王小明",
-            IDNumber: "A123456789",
-            gender: parseEnumKey(Gender, Gender.Male)?.toString(),
-            birth: "2000-01-15",
-            department: "資工系 2 年級",
-            phone: "0912345678",
-            email: "xiaoming@example.com",
-            emergencyContact: "王媽媽",
-            emergencyPhone: "0987654321",
-            isLeader: true,
-            address: "台北市信義區信義路100號",
-        },
-        {
-            id: 2,
-            studentNumber: "S1002",
-            name: "李小華",
-            IDNumber: "B987654321",
-            gender: parseEnumKey(Gender, Gender.Female)?.toString(),
-            birth: "1999-05-20",
-            department: "機械系 3 年級",
-            phone: "0922333444",
-            email: "xiaohua@example.com",
-            emergencyContact: "李爸爸",
-            emergencyPhone: "0911222333",
-            isLeader: false,
-            address: "新北市板橋區文化路200號",
-        },
-        {
-            id: 3,
-            studentNumber: "S1003",
-            name: "陳大同",
-            IDNumber: "C112233445",
-            gender: parseEnumKey(Gender, Gender.Male)?.toString(),
-            birth: "2001-08-10",
-            department: "電機系 1 年級",
-            phone: "0933444555",
-            email: "datong@example.com",
-            emergencyContact: "陳媽媽",
-            emergencyPhone: "0966778899",
-            isLeader: false,
-            address: "台中市西屯區福雅路300號",
-        },
-        {
-            id: 4,
-            studentNumber: "S1004",
-            name: "張美玲",
-            IDNumber: "D556677889",
-            gender: parseEnumKey(Gender, Gender.Female)?.toString(),
-            birth: "2002-03-12",
-            department: "外文系 1 年級",
-            phone: "0955667788",
-            email: "meiling@example.com",
-            emergencyContact: "張爸爸",
-            emergencyPhone: "0922113344",
-            isLeader: true,
-            address: "高雄市鼓山區龍德路50號",
-        },
-        {
-            id: 5,
-            studentNumber: "S1005",
-            name: "黃志強",
-            IDNumber: "E998877665",
-            gender: parseEnumKey(Gender, Gender.Male)?.toString(),
-            birth: "1998-11-25",
-            department: "土木系 4 年級",
-            phone: "0977889900",
-            email: "zhiqiang@example.com",
-            emergencyContact: "黃媽媽",
-            emergencyPhone: "0933556677",
-            isLeader: false,
-            address: "台南市東區大學路1號",
-        },
-        {
-            id: 6,
-            studentNumber: "S1006",
-            name: "林佳慧",
-            IDNumber: "F334455667",
-            gender: parseEnumKey(Gender, Gender.Female)?.toString(),
-            birth: "2000-07-08",
-            department: "護理系 3 年級",
-            phone: "0911223344",
-            email: "jiahui@example.com",
-            emergencyContact: "林爸爸",
-            emergencyPhone: "0977665544",
-            isLeader: true,
-            address: "新竹市東區光復路123號",
-        },
-        {
-            id: 7,
-            studentNumber: "S1007",
-            name: "周文宏",
-            IDNumber: "G776655443",
-            gender: parseEnumKey(Gender, Gender.Male)?.toString(),
-            birth: "1999-09-30",
-            department: "法律系 2 年級",
-            phone: "0933667788",
-            email: "wenhong@example.com",
-            emergencyContact: "周媽媽",
-            emergencyPhone: "0911888777",
-            isLeader: false,
-            address: "宜蘭縣羅東鎮中山路88號",
-        },
-        {
-            id: 8,
-            studentNumber: "S1008",
-            name: "許雅婷",
-            IDNumber: "H445566778",
-            gender: parseEnumKey(Gender, Gender.Female)?.toString(),
-            birth: "2001-12-05",
-            department: "商管系 1 年級",
-            phone: "0966889900",
-            email: "yating@example.com",
-            emergencyContact: "許爸爸",
-            emergencyPhone: "0922999888",
-            isLeader: true,
-            address: "嘉義市西區中正路77號",
-        }
-    ],
+    rowsData: [],
     keyOrder: [
       "id",
       "name",
@@ -303,65 +193,81 @@ export const teamMemberFakeData: {rowsHeader: RowHeader[], rowsData: RowData[], 
     ]
 }
 
-export const personalIteamListFakeData: { rowsHeader: RowHeader[], rowsData: RowData[], keyOrder: string[] } = {
+export const personalIteamListFakeData: { rowsHeader: EditableRowHeader[], rowsData: RowData[], keyOrder: string[] } = {
   rowsHeader: [
     {
       key: "type",
       label: "種類",
       type: { type: "text" },
+      edit: true,
       validate: (v: string) => v.length > 0,
     },
     {
       key: "name",
       label: "裝備名稱",
+      edit: false,
       type: { type: "text" },
       validate: (v: string) => v.length > 0,
     },
     {
-      key: "important",
+      key: "required",
       label: "是否必要",
+      edit: true,
       type: { type: "checkbox" },
       validate: (v: string) => ["true", "false"].includes(v),
     },
+    {
+      key: "weight",
+      label: "重量(克)",
+      edit: false,
+      type: { type: "number" },
+      validate: (v: string) => !isNaN(Number(v)) && Number(v) >= 0,
+    },
+    {
+      key: "quantity",
+      label: "數量",
+      edit: true,
+      type: { type: "text" },
+      validate: (v: string) => v == "適量" || (!isNaN(Number(v)) && Number(v) >= 0)
+    },
   ],
-  rowsData: [
-    { id: 1, type: "服裝類", name: "保暖衣", important: "true" },
-    { id: 2, type: "服裝類", name: "兩件式雨衣", important: "false" },
-    { id: 3, type: "裝備類", name: "水壺", important: "true" },
-    { id: 4, type: "裝備類", name: "頭燈", important: "false" },
-    { id: 5, type: "其他", name: "個人藥品", important: "false" },
-    { id: 6, type: "其他", name: "打火機", important: "false" },
-  ],
+  rowsData: [],
   keyOrder: [
     "type",
-    "important",
-    "name"
+    "required",
+    "name",
+    "weight",
+    "quantity"
   ]
 }
 
-export const teamItemListFakeData: { rowsHeader: RowHeader[], rowsData: RowData[], keyOrder: string[] } = {
+export const teamItemListFakeData: { rowsHeader: EditableRowHeader[], rowsData: RowData[], keyOrder: string[] } = {
   rowsHeader: [
     {
       key: "type",
       label: "種類",
+      edit: true,
       type: { type: "text" },
       validate: (v: string) => v.length > 0,
     },
     {
       key: "name",
       label: "裝備名稱",
+      edit: false,
       type: { type: "text" },
       validate: (v: string) => v.length > 0,
     },
     {
       key: "quantity",
       label: "數量",
+      edit: true,
       type: { type: "number" },
       validate: (v: string) => !isNaN(Number(v)) && Number(v) >= 0,
     },
     {
       key: "weight",
       label: "重量(克)",
+      edit: false,
       type: { type: "number" },
       calc: [
           {
@@ -374,31 +280,7 @@ export const teamItemListFakeData: { rowsHeader: RowHeader[], rowsData: RowData[
       validate: (v: string) => !isNaN(Number(v)) && Number(v) >= 0,
     },
   ],
-  rowsData: [
-    // 技術裝備
-    { id: 1, type: "技術裝備", name: "安全帽", quantity: "1", weight: "350" },
-    { id: 2, type: "技術裝備", name: "安全吊帶", quantity: "1", weight: "600" },
-    { id: 3, type: "技術裝備", name: "主繩", quantity: "1", weight: "2500" },
-    { id: 4, type: "技術裝備", name: "快扣", quantity: "4", weight: "200" },
-    { id: 5, type: "技術裝備", name: "上升器", quantity: "1", weight: "250" },
-    { id: 6, type: "技術裝備", name: "下降器", quantity: "1", weight: "200" },
-
-    // 炊事裝備
-    { id: 7, type: "炊事裝備", name: "瓦斯爐", quantity: "1", weight: "350" },
-    { id: 8, type: "炊事裝備", name: "瓦斯罐", quantity: "2", weight: "500" },
-    { id: 9, type: "炊事裝備", name: "湯鍋", quantity: "1", weight: "700" },
-    { id: 10, type: "炊事裝備", name: "炒鍋", quantity: "1", weight: "800" },
-    { id: 11, type: "炊事裝備", name: "餐具組", quantity: "4", weight: "300" },
-    { id: 12, type: "炊事裝備", name: "濾水袋", quantity: "1", weight: "150" },
-
-    // 營帳裝備
-    { id: 13, type: "營帳裝備", name: "帳篷外帳", quantity: "1", weight: "1500" },
-    { id: 14, type: "營帳裝備", name: "帳篷內帳", quantity: "1", weight: "1200" },
-    { id: 15, type: "營帳裝備", name: "營柱", quantity: "1", weight: "800" },
-    { id: 16, type: "營帳裝備", name: "地布", quantity: "1", weight: "500" },
-    { id: 17, type: "營帳裝備", name: "營釘", quantity: "10", weight: "400" },
-    { id: 18, type: "營帳裝備", name: "風繩", quantity: "6", weight: "300" },
-  ],
+  rowsData: [],
   keyOrder: [
     "type",
     "name",

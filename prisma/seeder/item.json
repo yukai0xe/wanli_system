@@ -1,0 +1,79 @@
+[
+  {
+    "id": 1,
+    "name": "打火機",
+    "weight": 0.75,
+    "type": "Other",
+    "description": "傳統打火石打火機，不是電子式打火機"
+  },
+  {
+    "id": 2,
+    "name": "野營鍋具組",
+    "weight": 1.5,
+    "type": "Cooking",
+    "description": "鋁製可折疊鍋具，適合多人炊事"
+  },
+  {
+    "id": 3,
+    "name": "登山帳篷",
+    "weight": 3.2,
+    "type": "Camping",
+    "description": "雙人防風防雨帳篷"
+  },
+  {
+    "id": 4,
+    "name": "保暖外套",
+    "weight": 1.1,
+    "type": "Clothing",
+    "description": "羽絨填充，適合低溫環境"
+  },
+  {
+    "id": 5,
+    "name": "個人急救包",
+    "weight": 0.5,
+    "type": "PersonalEquip",
+    "description": "內含繃帶、消毒藥水與止痛藥"
+  },
+  {
+    "id": 6,
+    "name": "便攜式瓦斯爐",
+    "weight": 1.8,
+    "type": "Cooking",
+    "description": "小型瓦斯罐專用，快速加熱"
+  },
+  {
+    "id": 7,
+    "name": "頭燈",
+    "weight": 0.3,
+    "type": "PersonalEquip",
+    "description": "LED 照明，附可調整亮度模式"
+  },
+  {
+    "id": 8,
+    "name": "睡袋",
+    "weight": 2.0,
+    "type": "Camping",
+    "description": "適合零下 5 度環境使用的保暖睡袋"
+  },
+  {
+    "id": 9,
+    "name": "登山鞋",
+    "weight": 1.4,
+    "type": "Clothing",
+    "description": "防水防滑，適合長途徒步"
+  },
+  {
+    "id": 10,
+    "name": "指南針",
+    "weight": 0.2,
+    "type": "Other",
+    "description": "高精度金屬外殼指南針"
+  },
+  {
+    "id": 11,
+    "name": "吊扣/大D",
+    "weight": 0.2,
+    "type": "Technical",
+    "description": "吊掛用技術裝備"
+  }
+]

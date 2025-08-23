@@ -9,8 +9,6 @@ import ItemList from "@/app/admin/ItemList";
 import { finalPlanType, TeamRole } from "@/types/enum";
 import {
   teamMemberFakeData as tmfake,
-  personalIteamListFakeData as pitemfake,
-  teamItemListFakeData as titemfake
 } from "@/lib/viewModel/tableData";
 import { parseEnumKey } from "@/lib/utility";
 
@@ -27,6 +25,7 @@ const Page = () => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const tabRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [teamMembers, setTeamMembers] = useState<RowData[]>([]);
+  
 
   useEffect(() => {
     if (tabRefs.current[selectedTab]) {
@@ -49,14 +48,14 @@ const Page = () => {
         team.members.map(({ role, birth, ...m }, idx) => {
           return {
             ...m,
-            id: idx,
+            id: idx.toString(),
             birth: birth?.toLocaleString() || "",
             isLeader: role !== parseEnumKey(TeamRole, TeamRole.NormalMember),
           };
         })
       );
     }
-  }, [team.members])
+  }, [team.members]);
 
   const teamMemberTableFeature = {
     addNewMember: () => {
@@ -70,39 +69,23 @@ const Page = () => {
     exportMembersAsExcel: () => {}
   }
 
-  const itemsListTableFeature = {
-    addNewItems: () => { },
-    exportItemsAsDocs: () => {}
-  }
-
   const renderTab = (label: string) => {
     switch (label) {
       case finalPlanType.teamMemberList:
         return (
           <TeamMember
-            feature={teamMemberTableFeature}
             rowsProp={tmfake.rowsHeader}
             dataProp={teamMembers}
+            feature={teamMemberTableFeature}
           />
         );
       case finalPlanType.personalItemList:
         return (
-          <ItemList
-            key="personal"
-            rowsProp={pitemfake.rowsHeader}
-            dataProp={pitemfake.rowsData}
-            feature={itemsListTableFeature}
-          />
+          <ItemList key="personal"/>
         );
       case finalPlanType.teamItemList:
         return (
-          <ItemList
-            key="team"
-            rowsProp={titemfake.rowsHeader}
-            dataProp={titemfake.rowsData}
-            feature={itemsListTableFeature}
-            isTeam
-          />
+          <ItemList key="team" isTeam/>
         );
       case finalPlanType.BPlan:
         return (

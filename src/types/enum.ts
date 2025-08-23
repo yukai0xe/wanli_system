@@ -88,19 +88,13 @@ export enum MemberColumn {
   emergencyPhone = "緊急連絡人電話",
 }
 
-export enum PersonalItemType {
-  cooking = "炊事類",
-  camping = "營帳類",
-  clothing = "服裝類",
-  personalEquip = "個人裝備類",
-  other = "其他類"
-}
-
-export enum TeamItemType {
-  technical = "技術類",
-  cooking = "炊事類",
-  camping = "營帳類",
-  other = "其他類"
+export enum ItemType {
+  Cooking = "炊事類",
+  Camping = "營帳類",
+  Clothing = "服裝類",
+  PersonalEquip = "個人裝備類",
+  Technical = "技術類",
+  Other = "其他類"
 }
 
 export enum ItemColumn {

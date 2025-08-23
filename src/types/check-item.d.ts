@@ -1,9 +1,15 @@
-import { ItemCheckState } from "./enum";
+import { ItemCheckState, ItemType } from "./enum";
 
 declare global {
+
   interface Item {
+    id: string;
     name: string;
     description: string;
+    type: ItemType;
+    weight?: number;
+    required?: boolean;
+    quantity?: string;
   }
 
   interface MemberItem extends Item {

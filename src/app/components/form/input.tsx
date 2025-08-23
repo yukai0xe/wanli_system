@@ -22,7 +22,7 @@ const renderInput = (item: inputProps) => {
           className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
         >
           {item.input.value.map((opt, idx) => (
-            <option key={idx} value={opt.value}>
+            <option className="z-50" key={idx} value={opt.value}>
               {opt.label}
             </option>
           ))}
@@ -34,7 +34,7 @@ const renderInput = (item: inputProps) => {
           id={item.id}
           name={item.name}
           type="checkbox"
-          checked={item.value === "true"}
+          checked={item.value as boolean}
           onChange={(e) =>
             item.inputChangeHandler(e.currentTarget.checked ? "true" : "false")
           }
@@ -109,8 +109,20 @@ const InputComponent = ({
             {label}
           </label>
         )}
-        <div className={`mt-2 ${nolabel ? "w-full" : "w-1/2 min-w-[150px] size-max"}`}>
-          {renderInput({id, name, label, placeholder, input, value, inputChangeHandler})}
+        <div
+          className={`mt-2 ${
+            nolabel ? "w-full" : "w-1/2"
+          } min-w-[200px] size-max`}
+        >
+          {renderInput({
+            id,
+            name,
+            label,
+            placeholder,
+            input,
+            value,
+            inputChangeHandler,
+          })}
         </div>
       </div>
     );

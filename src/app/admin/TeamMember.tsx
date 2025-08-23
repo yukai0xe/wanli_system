@@ -10,10 +10,10 @@ import {
 } from "react-icons/hi2";
 
 const { keyOrder } = teamMemberFakeData;
-const sortHeaderRule = (data: RowHeader[]) => {
+const sortHeaderRule = (data: EditableRowHeader[]) => {
   return keyOrder
     .map((key) => data.find((h) => h.key === key))
-    .filter((h): h is RowHeader => !!h);
+    .filter((h): h is EditableRowHeader => !!h);
   };
 const sortDataRule = (data: RowData[]) => {
   return data.map((row) => {
@@ -26,7 +26,7 @@ const sortDataRule = (data: RowData[]) => {
 };
 
 const TeamMemberTable: React.FC<{
-  rowsProp: RowHeader[],
+  rowsProp: EditableRowHeader[],
   dataProp: RowData[],
   feature: {
     addNewMember: () => void,
@@ -39,6 +39,7 @@ const TeamMemberTable: React.FC<{
   
     const rowsSortingProp = sortHeaderRule(rowsProp);
     const [open, setOpen] = useState<boolean>(false);
+    const [loading, ] = useState<boolean>(false);
     const [dataSortingProp, setDataSortingProp] = useState(sortDataRule(dataProp));
     const [q, setQ] = useState("");
     const [isOpen, setIsOpen] = useState([true, true]);
@@ -62,7 +63,7 @@ const TeamMemberTable: React.FC<{
 
     return (
       <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white p-6">
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="relative min-h-96 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* <h1 className="text-xl font-semibold tracking-tight">使用者清單</h1> */}
             <div className="mt-4 text-xs text-gray-500">
@@ -110,48 +111,59 @@ const TeamMemberTable: React.FC<{
               </div>
             </div>
           </div>
-
-          <div className="mb-5">
-            <h3>
-              幹部 {allTeamMember && "(所有幹部)"}{" "}
-              <span
-                onClick={() => setIsOpen([!isOpen[0], isOpen[1]])}
-                className="cursor-pointer"
-              >
-                {isOpen[0] ? "▲" : "▼"}
-              </span>
-            </h3>
-            {isOpen[0] && (
-              <EditableTable
-                rowsSortingProp={rowsSortingProp}
-                dataSortingProp={dataSortingProp.filter((d) => filterLeader(d))}
-                q={q}
-              />
-            )}
-          </div>
-
-          <div className="mb-5">
-            <h3>
-              一般隊員 {allTeamMember && "(包含過去隊員)"}{" "}
-              <span
-                onClick={() => setIsOpen([isOpen[0], !isOpen[1]])}
-                className="cursor-pointer"
-              >
-                {isOpen[1] ? "▲" : "▼"}
-              </span>
-            </h3>
-            {isOpen[1] && (
-              <EditableTable
-                rowsSortingProp={rowsSortingProp}
-                dataSortingProp={dataSortingProp.filter(
-                  (d) => !filterLeader(d)
+          
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded">
+              <div className="flex flex-col items-center">
+                <div className="loader mb-2"></div>
+                <p className="text-gray-600 text-sm">資料加載中...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-5">
+                <h3>
+                  幹部 {allTeamMember && "(所有幹部)"}{" "}
+                  <span
+                    onClick={() => setIsOpen([!isOpen[0], isOpen[1]])}
+                    className="cursor-pointer"
+                  >
+                    {isOpen[0] ? "▲" : "▼"}
+                  </span>
+                </h3>
+                {isOpen[0] && (
+                  <EditableTable
+                    rowsSortingProp={rowsSortingProp}
+                    dataSortingProp={dataSortingProp.filter((d) => filterLeader(d))}
+                    q={q}
+                  />
                 )}
-                q={q}
-              />
-            )}
-          </div>
-          {isOpen && (
-            <AddNewTeamMember open={open} handleClose={closeHandler} handleConfirm={feature.addNewMember} />
+              </div>
+
+              <div className="mb-5">
+                <h3>
+                  一般隊員 {allTeamMember && "(包含過去隊員)"}{" "}
+                  <span
+                    onClick={() => setIsOpen([isOpen[0], !isOpen[1]])}
+                    className="cursor-pointer"
+                  >
+                    {isOpen[1] ? "▲" : "▼"}
+                  </span>
+                </h3>
+                {isOpen[1] && (
+                  <EditableTable
+                    rowsSortingProp={rowsSortingProp}
+                    dataSortingProp={dataSortingProp.filter(
+                      (d) => !filterLeader(d)
+                    )}
+                    q={q}
+                  />
+                )}
+              </div>
+              {isOpen && (
+                <AddNewTeamMember open={open} handleClose={closeHandler} handleConfirm={feature.addNewMember} />
+              )}
+            </>
           )}
         </div>
       </div>

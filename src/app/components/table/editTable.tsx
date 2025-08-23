@@ -3,18 +3,6 @@ import InputComponent from "@/app/components/form/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gender } from "@/types/enum";
 
-type RowData = {
-  id: number;
-  [key: string]: number | string | boolean | undefined;
-};
-
-type RowHeader = {
-  key: string;
-  label: string;
-  type: InputObject;
-  validate: (v: string) => boolean;
-};
-
 const SortButton: React.FC<{
   k: string;
   label: string;
@@ -40,23 +28,23 @@ const SortButton: React.FC<{
 );
 
 const EditableTable: React.FC<{
-    rowsSortingProp: RowHeader[];
+    rowsSortingProp: EditableRowHeader[];
     dataSortingProp: RowData[];
     q: string;
 }> = ({ rowsSortingProp, dataSortingProp, q }) => {
-  const rowHeaders: RowHeader[] =
+  const rowHeaders: EditableRowHeader[] =
     rowsSortingProp
       .filter(
         (r) => r.key !== "id" && r.key !== "isLeader" && r.key !== "type"
       ) || [];
 
   const [rowData, setRowData] = useState<RowData[]>(dataSortingProp);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Partial<RowData>>({});
 
   const [sortKey, setSortKey] = useState<keyof RowData | string>("name");
   const [sortAsc, setSortAsc] = useState(true);
-  const [highlightedId, setHighlightedId] = useState<number | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const normalized = q.trim().toLowerCase();
@@ -83,8 +71,20 @@ const EditableTable: React.FC<{
   }, [rowData, q, sortKey, sortAsc]);
 
   const startEdit = (row: RowData) => {
+    const _rowheader = rowHeaders.map(r => {
+        return (
+        {
+          key: r.key,
+          edit: r.edit
+        })
+    })
+    const draftRow: RowData = { id: row.id };
+    Object.keys(row).forEach(k => {
+      if(_rowheader.some(rh => rh.key === k && rh.edit)) draftRow[k] = row[k];
+    })
+
     setEditingId(row.id);
-    setDraft({ ...row });
+    setDraft(draftRow);
   };
 
   const cancelEdit = () => {
@@ -97,7 +97,7 @@ const EditableTable: React.FC<{
 
     let isValid = true;
     rowHeaders.forEach((rowHeader) => {
-      if (!isValid) return;
+      if (!isValid || !(rowHeader.key in draft)) return;
         const r = draft[rowHeader.key] ?? null;
         if (typeof r === "string" && !rowHeader.validate(r.trim())) isValid = false;
     });
@@ -115,7 +115,7 @@ const EditableTable: React.FC<{
     setDraft({});
   };
 
-  const setDraftField = (key: string, value: string) => {
+  const setDraftField = (key: string, value: string | boolean) => {
     setDraft((d) => ({ ...d, [key]: value }));
   };
 
@@ -130,19 +130,29 @@ const EditableTable: React.FC<{
     
     const renderValue = (key: string, value?: number | string | boolean) => {
         switch (key) {
-            case "gender":
-                return Gender[value as keyof typeof Gender];
-            case "important":
-                return value === "true" ? "必須" : "選配"
-            default:
-                return value;
+          case "gender":
+            return Gender[value as keyof typeof Gender];
+          case "required":
+            return value ? "必配" : "選配";
+          default:
+            return value;
         }
     }
 
-    const renderEditInput = (rowheader: RowHeader, key: string, value?: string | number | boolean) => {
+    const renderEditInput = (rowheader: EditableRowHeader, key: string, value?: string | number | boolean) => {
         switch (typeof value) {
           case "boolean":
+            return (
+              <InputComponent
+                direction
+                label={rowheader.label}
+                value={value}
+                input={rowheader.type}
+                inputChangeHandler={(v: string) => setDraftField(key, v === "true")}
+              />
+            );
           case "string":
+          case "number":
             return (
               <InputComponent
                 direction
