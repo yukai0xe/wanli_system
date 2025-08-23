@@ -1,7 +1,8 @@
-'use client'
+"use client";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 const LoginPage = () => {
   const [username, setUserName] = useState("");
@@ -22,72 +23,71 @@ const LoginPage = () => {
     };
     checkSession();
   }, [router]);
-  
-    
-    const handleAuth = async (e: React.FormEvent) => {
-       e.preventDefault();
-       setIsLoading(true);
 
-       const email = `${username.trim()}@wanli.student.com`;
-      const { data } = await supabase.auth.signInWithPassword({
-            email, password
-          });
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-          const accessToken = data.session?.access_token;
-      if (!accessToken) {
-        setIsLoading(false);
-        return alert("登入失敗");
-      }
-      else {
-        localStorage.setItem("access_token", accessToken);
-        fetch("/api/profile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            username,
-            reason,
-          }),
-        }).then((res) => {
-          console.log(res);
-          alert("登入成功");
-          router.push("/admin/welcome");
-        });
-      }
+    const email = `${username.trim()}@wanli.student.com`;
+    const { data } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-       setIsLoading(false);
-     };
-    
+    const accessToken = data.session?.access_token;
+    if (!accessToken) {
+      setIsLoading(false);
+      return alert("登入失敗");
+    } else {
+      localStorage.setItem("access_token", accessToken);
+      fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          username,
+          reason,
+        }),
+      }).then((res) => {
+        console.log(res);
+        alert("登入成功");
+        router.push("/admin/welcome");
+      });
+    }
+
+    setIsLoading(false);
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-4xl font-bold">
-        山社管理系統
-      </h1>
-      <form className="mt-4 flex flex-col">
-        <input
-          type="text"
-          placeholder="輸入名稱"
-          onChange={(e) => setUserName(e.target.value)}
-          className="border p-2 rounded mb-2"
-        />
-        <input
-          type="password"
-          placeholder="輸入密碼"
-          onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 rounded mb-4"
-        />
-        <button
+    <Suspense fallback={<div>Loading...</div>}>
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-4xl font-bold">山社管理系統</h1>
+        <form className="mt-4 flex flex-col">
+          <input
+            type="text"
+            placeholder="輸入名稱"
+            onChange={(e) => setUserName(e.target.value)}
+            className="border p-2 rounded mb-2"
+          />
+          <input
+            type="password"
+            placeholder="輸入密碼"
+            onChange={(e) => setPassword(e.target.value)}
+            className="border p-2 rounded mb-4"
+          />
+          <button
             type="button"
             className="bg-blue-500 text-white p-2 rounded"
             onClick={handleAuth}
             disabled={isLoading}
-        >
-          {isLoading ? "處理中..." : "登入"}
-        </button>
-      </form>
-    </div>
+          >
+            {isLoading ? "處理中..." : "登入"}
+          </button>
+        </form>
+      </div>
+    </Suspense>
   );
 };
 
