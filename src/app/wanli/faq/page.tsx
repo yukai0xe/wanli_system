@@ -1,6 +1,6 @@
 'use client'
 import Collapse from '@/app/components/collapse';
-import CommonLayout from '../../layout/commonLayout';
+import CommonLayout from '@/app/layout/commonLayout';
 import { useEffect, useState } from 'react';
 
 const Faq = () => {

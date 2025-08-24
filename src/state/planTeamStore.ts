@@ -2,6 +2,7 @@ import { DateType, TeamActivityType, TeamCategory, EventState } from "@/types/en
 import { create } from "zustand";
 import { persist, devtools } from "zustand/middleware";
 import { parseEnumKey } from "@/lib/utility";
+import { apiFetch } from "@/lib/middleware/clientAuth";
 
 const initialTeam: PlanTeam = {
   mainName: "",
@@ -60,23 +61,18 @@ export const usePlanTeamStore = create<PlanTeamState>()(
             if (state.id  === idParam) {
               return state.team;
             } else {
-                try {
-                    const accessToken = localStorage.getItem("access_token");
-                    const res = await fetch(`/api/planTeam?id=${idParam}`, {
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                        }
-                    });
-                    if (!res.ok) throw new Error('Network response was not ok');
-
-                    const fetchedTeamData = await res.json();
-                    if (!fetchedTeamData) throw new Error('Team not found');
-                    const { team, planTeamMeta } = fetchedTeamData;
-                    set({ team, id: idParam });
-                  
-                    const metaStore = usePlanTeamMetaStore.getState();
-                    if(!metaStore.getPlanTeamMetaById(idParam)) metaStore.addPlanTeamMeta(planTeamMeta);
-                    return team;
+              try {
+                  const fetchedTeamData = await apiFetch<{
+                    team: PlanTeam,
+                    planTeamMeta: PlanTeamMeta
+                  }>(`/planTeam?id=${idParam}`);
+                  if (!fetchedTeamData) throw new Error('Team not found');
+                  const { team, planTeamMeta } = fetchedTeamData;
+                  set({ team, id: idParam });
+                
+                  const metaStore = usePlanTeamMetaStore.getState();
+                  if(!metaStore.getPlanTeamMetaById(idParam)) metaStore.addPlanTeamMeta(planTeamMeta);
+                  return team;
 
                 } catch (err) {
                     console.error('Fetch error:', err);

@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useItemListStore } from "@/state/ItemListStore";
 import { ItemType } from "@/types/enum";
+import { apiFetch } from "@/lib/middleware/clientAuth";
 
 
 const keyOrder = [...new Set([...pItemfake.keyOrder, ...tItemfake.keyOrder])];
@@ -96,16 +97,7 @@ const ItemListTable: React.FC<{
   }
 
   const getItemsFromDB = async () => {
-    const accessToken = localStorage.getItem('access_token');
-    fetch('/api/item', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        setItemsFromDB(data)
-      });
+    apiFetch<Item[]>("/item").then((data) => setItemsFromDB(data));
   }
 
   const addNewItemsFromDB = (itemIds: Set<string>) => {

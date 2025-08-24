@@ -1,5 +1,5 @@
 import WanliFileService from '@/lib/service/wanliFileService';
-import { authenticate } from '@/lib/middleware/auth';
+import { authenticate } from '@/lib/middleware/serverAuth';
 import { FileType } from "@prisma/client";
 
 export async function GET(request: Request) {

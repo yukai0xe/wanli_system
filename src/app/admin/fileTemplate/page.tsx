@@ -5,6 +5,7 @@ import { Button1 } from "@/app/components/button";
 import DialogComponent from "@/app/components/dialog";
 import InputComponent from "@/app/components/form/input";
 import { FileType } from "@/types/enum";
+import { apiFetch } from "@/lib/middleware/clientAuth";
 
 const MainPage = () => {
   const [fileRef, setFileRef] = useState<fileObject | null>(null);
@@ -39,13 +40,8 @@ const MainPage = () => {
       setFileRef(null);
     }
 
-    const accessToken = localStorage.getItem("access_token");
-    fetch("/api/wanliFile", {
+    apiFetch("/wanliFile",{
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify({
         fileObject: {
           id: fileRef.id,
@@ -55,27 +51,13 @@ const MainPage = () => {
         storagePath: path,
       }),
     })
-      .then(res => {
-        if (!res.ok) {
-          alert("建立資料庫紀錄失敗");
-        } else {
-          fetchFilesList();
-        }
-      })
-
+    .then(() => fetchFilesList());
   };
 
   const fetchFilesList = async () => {
     const allFiles: Record<string, fileObject[]> = {};
 
-    const accessToken = localStorage.getItem('access_token');
-    const res = await fetch(`/api/wanliFile`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const dbData: fileObject[] = await res.json();
-
+    const dbData = await apiFetch<fileObject[]>('/wanliFile');
     for (const data of dbData) {
       if (!(data.type in allFiles)) allFiles[data.type] = [];
       allFiles[data.type].push(data);
@@ -124,26 +106,15 @@ const MainPage = () => {
         console.error(`刪除 ${displayName} 失敗`, error);
       }
     }
-    const accessToken = localStorage.getItem("access_token");
+
     const idArray = selectedFiles.map(f => f.id);
     setSelectedFiles([]);
-    fetch("/api/wanliFile", {
+    apiFetch("/wanliFile", {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify({
         idArray,
       }),
-    }).then((res) => {
-      if (!res.ok) {
-        alert("刪除資料庫紀錄失敗");
-      } else {
-        fetchFilesList();
-      }
-    });
-    
+    }).then(() => fetchFilesList());
   };
 
   useEffect(() => {

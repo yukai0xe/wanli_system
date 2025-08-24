@@ -5,6 +5,7 @@ import { AnimatedAddNewTeam } from "@/app/components/form/newTeam";
 import { usePlanTeamStore, useDraftTeamStore, usePlanTeamMetaStore } from '@/state/planTeamStore';
 import { useRouter } from "next/navigation";
 import { FaRegSquarePlus } from "react-icons/fa6";
+import { apiFetch } from "@/lib/middleware/clientAuth";
 
 const TeamBarComponent = ({ team }: { team: PlanTeamMeta }) => {
   const router = useRouter();
@@ -115,20 +116,9 @@ const MainPage = () => {
   // initial
   useEffect(() => {
     setLoading(true);
-    const accessToken = localStorage.getItem("access_token");
-    fetch("/api/planTeam", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("讀取失敗");
-        return res.json();
-      })
-      .then((allTeamMeta: PlanTeamMeta[]) => {
+    apiFetch<PlanTeamMeta[]>('/planTeam')
+      .then((allTeamMeta) => {
         setPlanTeamMeta(allTeamMeta);
-      })
-      .catch((error) => {
-        if (error instanceof Error) alert(`讀取失敗: ${error.message}`);
-        else alert("讀取失敗: 發生未知錯誤");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -136,21 +126,16 @@ const MainPage = () => {
   // store
   const saveTeam = async () => {
     setLoading(true);
-    const accessToken = localStorage.getItem("access_token");
     try {
-      const res = await fetch("/api/planTeam", {
+      const data = await apiFetch<{
+        planTeam: PlanTeam,
+        id: number,
+        metaData: PlanTeamMeta
+      }>("/planTeam", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(draftTeam),
+        body: JSON.stringify(draftTeam)
       });
-      if (!res.ok) throw new Error("儲存失敗");
-      const data = await res.json();
-
       alert("儲存成功");
-
       if (data?.planTeam) setTeam(data.planTeam);
       if (data?.id && setId) setId(data.id);
       if (data?.metaData) addPlanTeamMeta(data.metaData);

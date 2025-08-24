@@ -19,6 +19,7 @@ import { PiPersonSimpleHikeFill } from "react-icons/pi";
 import { FaFileInvoice } from "react-icons/fa";
 import { MdListAlt } from "react-icons/md";
 import { FaGear } from "react-icons/fa6";
+import { useAuthGuard } from "@/lib/middleware/clientAuth";
 
 export const prefixUrl = "/admin";
 
@@ -26,11 +27,10 @@ const EntryPage = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
   
-  const router = useRouter();
+  useAuthGuard();
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
-  const { setLoading } = useViewState();
-  const loading = useViewState(state => state.loading);
+  const {loading, setLoading } = useViewState();
   const username = useUserStore(state => state.username);
 
   useEffect(() => {
@@ -39,63 +39,6 @@ const EntryPage = ({
       prevPathname.current = pathname;
     }
   }, [pathname]);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        localStorage.removeItem("access_token");
-        router.replace("/wanli/admin");
-      }
-    };
-    checkSession();
-  }, [router]);
-
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        localStorage.setItem("access_token", session.access_token);
-      } else {
-        localStorage.removeItem("access_token");
-        router.push("/wanli/admin");
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const setUsername = useUserStore((state) => state.setUsername);
-
-  useEffect(() => {
-    setLoading(true);
-    const accessToken = localStorage.getItem("access_token");
-    fetch("/api/profile", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("No profile found");
-        return res.json() ?? { username: null };
-      })
-      .then(({ username }) => {
-        if (!username) throw new Error("Missing username");
-        setUsername(username);
-        setLoading(false);
-      })
-      .catch(() => {
-        localStorage.removeItem("access_token");
-        router.push("/wanli");
-        // if (error instanceof Error) alert(`讀取失敗: ${error.message}`);
-        // else alert("讀取失敗: 發生未知錯誤");
-      })
-  }, []);
 
   const [dots, setDots] = useState("");
 
@@ -132,7 +75,7 @@ const DashboardLayout = ({
   const [bars, setBars] = useState<{ width: number; height: number }[]>([]);
   const router = useRouter();
   const pathname = usePathname().split("/");
-  const lastPathname = pathname.pop();
+  const lastPathname = pathname[pathname.length - 1];
   const username = useUserStore((state) => state.username);
   const team = usePlanTeamStore((state) => state.team);
   const teamId = usePlanTeamStore((state) => state.id);

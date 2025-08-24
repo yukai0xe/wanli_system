@@ -1,5 +1,5 @@
 import PlanTeamService from '@/lib/service/planTeamService';
-import { authenticate } from '@/lib/middleware/auth';
+import { authenticate } from '@/lib/middleware/serverAuth';
 
 export async function GET(request: Request) {
   try {

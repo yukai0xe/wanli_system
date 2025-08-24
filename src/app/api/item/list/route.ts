@@ -1,4 +1,4 @@
-import { authenticate } from '@/lib/middleware/auth';
+import { authenticate } from '@/lib/middleware/serverAuth';
 import ItemService from '@/lib/service/itemService';
 
 export async function POST(request: Request) {

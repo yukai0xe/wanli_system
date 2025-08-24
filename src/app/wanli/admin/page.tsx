@@ -51,8 +51,7 @@ const LoginPage = () => {
           username,
           reason,
         }),
-      }).then((res) => {
-        console.log(res);
+      }).then(() => {
         alert("登入成功");
         router.push("/admin/welcome");
       });
