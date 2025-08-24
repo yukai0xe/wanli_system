@@ -67,8 +67,7 @@ const ItemListTable: React.FC<{
       setLoading(true);
       const gdata: groupData = {};
       const rowData = isTeam ? await getTeamItemList() : await getPersonalItemList();
-      console.log(rowData);
-      const sortedData = sortDataRule(rowData);
+      const sortedData = sortDataRule(rowData as RowData[]);
       sortedData.forEach((data) => {
         if ("type" in data && (typeof data.type === "string" || typeof data.type === "number")) {
           if (!(data.type in gdata)) {

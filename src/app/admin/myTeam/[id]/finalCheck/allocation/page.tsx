@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { usePlanTeamStore } from "@/state/planTeamStore";
+import { useItemListStore } from "@/state/ItemListStore";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   useDraggable,
@@ -10,39 +12,65 @@ import {
 } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import type { DragEndEvent } from "@dnd-kit/core";
+import { PiNotePencilFill } from "react-icons/pi";
+import InputComponent from "@/app/components/form/input";
 
-type Equipment = { id: string; name: string; weight: number };
-
-const initialEquipment: Equipment[] = [
-  { id: "eq1", name: "帳篷", weight: 2000 },
-  { id: "eq2", name: "炊具", weight: 1500 },
-  { id: "eq3", name: "繩索", weight: 800 },
-  { id: "eq4", name: "醫療包", weight: 500 },
-  { id: "eq5", name: "發電機", weight: 3000 },
-];
+type Equipment = {
+  id: string;
+  name: string;
+  weight: number;
+  ownerId: string;
+  quantity: string;
+};
 
 type Member = {
   id: string;
   name: string;
   items: Equipment[];
-  maxWeight: number; // 新增負重上限
+  maxWeight: number;
 };
 
-// 範例初始成員資料
-const initialMembers: Member[] = Array.from({ length: 10 }).map((_, i) => ({
-  id: `m${i + 1}`,
-  name: `成員${i + 1}`,
-  items: [],
-  maxWeight: 5000 + i * 500, // 每個成員負重能力不同
-}));
-
 export default function AllocationPage() {
-    const [equipment, setEquipment] = useState(initialEquipment);
-    const [members, setMembers] = useState(initialMembers);
+    const { team, setTeam } = usePlanTeamStore();
+    const { teamItemList, getTeamItemList, setTeamItemList } = useItemListStore();
+    const [equipment, setEquipment] = useState<Equipment[]>([]);
+    const [members, setMembers] = useState<Member[]>([]);
     const [dragItem, setDragItem] = useState<Equipment | null>(null);
     const [splitItem, setSplitItem] = useState<Equipment | null>(null);
     const [memberId, setMemberId] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    
+    useEffect(() => {
+      async function getEquipment() {
+        const teamItemList: (Item & teamItem)[] = await getTeamItemList();
+        setEquipment(teamItemList.map(item => ({
+            id: item.id,
+            name: item.name,
+            weight: Number(item.weight),
+            ownerId: item.ownerId,
+            quantity: item.quantity
+          })));
+      }
+        getEquipment();
+    }, [])
 
+      useEffect(() => {
+        setLoading(true);
+        const newMembers = team.members
+          .map((m) => ({
+            id: String(m.id),
+            name: m.name,
+            items: equipment.filter(
+              (e) => e.ownerId.toString() === m.id?.toString()
+            ),
+            maxWeight: m.maxWeight || 1000,
+            edit: false,
+          }))
+          .sort((a, b) => b.maxWeight - a.maxWeight);
+        setMembers(newMembers);
+        setLoading(false);
+      }, [team.members, equipment, teamItemList]);
+  
     const handleDragEnd = (event: DragEndEvent) => {
       const { active, over } = event;
       if (!over) return;
@@ -51,58 +79,95 @@ export default function AllocationPage() {
       const sourceMemberId = active.data.current?.memberId || null;
       const targetMemberId = over.data.current?.memberId || null;
 
-      let movedItem: Equipment | null = null;
-
-      // 移除原來的地方
-      if (sourceMemberId) {
-        setMembers((prev) =>
-          prev.map((m) => {
-            if (m.id === sourceMemberId) {
-              const idx = m.items.findIndex((i) => i.id === itemId);
-              if (idx >= 0) {
-                movedItem = m.items[idx];
-                const newItems = [...m.items];
-                newItems.splice(idx, 1);
-                return { ...m, items: newItems };
-              }
-            }
-            return m;
-          })
-        );
-      } else {
-        const idx = equipment.findIndex((e) => e.id === itemId);
-        if (idx >= 0) {
-          movedItem = equipment[idx];
-          setEquipment((prev) => prev.filter((e) => e.id !== itemId));
+      if (sourceMemberId && targetMemberId) {
+        const movedItem = members.find((m) => m.id === sourceMemberId)?.items.find(it => it.id === itemId);
+        if (movedItem) {
+          setTeamItemList(
+            teamItemList.map((item) =>
+              item.itemId === itemId
+                ? {
+                    itemId: movedItem!.id,
+                    quantity: movedItem!.quantity,
+                    ownerId: targetMemberId
+                  }
+                : item
+            )
+          );
+          setEquipment((prev) =>
+            prev.map((e) =>
+              e.id === itemId
+                ? {
+                    ...e,
+                    ownerId: targetMemberId,
+                  }
+                : e
+            )
+          );
         }
       }
 
-      // 拖到成員
-      if (targetMemberId && movedItem) {
-        setMembers((prev) =>
-          prev.map((m) =>
-            m.id === targetMemberId
-              ? { ...m, items: [...m.items, movedItem!] }
-              : m
-          )
-        );
+      if(!sourceMemberId && targetMemberId) {
+        const movedItem = equipment.find((e) => e.id === itemId);
+        if (movedItem) {
+          setEquipment((prev) => prev.map(e => (
+            e.id === itemId ? {
+              ...e,
+              ownerId: targetMemberId
+            } : e
+          )));
+          setTeamItemList(
+            teamItemList.map((item) =>
+              item.itemId === itemId
+                ? {
+                    itemId: movedItem!.id,
+                    quantity: movedItem!.quantity,
+                    ownerId: targetMemberId
+                  }
+                : { ...item }
+            )
+          );
+        }
       }
-
-      // 拖回裝備清單
-      if (over.id === "equipmentList" && movedItem) {
-        setEquipment((prev) => [...prev, movedItem!]);
-      }
+      
+      if (sourceMemberId && !targetMemberId) {
+        const movedItem = members
+          .find((m) => m.id === sourceMemberId)
+          ?.items.find((it) => it.id === itemId);
+        if (movedItem) {
+          setEquipment((prev) =>
+            prev.map((e) =>
+              e.id === itemId
+                ? {
+                    ...e,
+                    ownerId: "",
+                  }
+                : e
+            )
+          );
+          setTeamItemList(
+            teamItemList.map((item) =>
+              item.itemId === movedItem!.id
+                ? {
+                    itemId: movedItem!.id,
+                    quantity: movedItem!.quantity,
+                    ownerId: "",
+                  }
+                : { ...item }
+            )
+          );
+        }
+      }  
 
       setDragItem(null);
     };
 
     const closeHandler = () => {
-        setSplitItem(null);
-        setMemberId(null);
-        setDragItem(null);
+      setSplitItem(null);
+      setMemberId(null);
+      setDragItem(null);
     }
 
-     const handleSplit = (item: Equipment, memberId: string | null, weight: number) => {
+    const handleSplit = (item: Equipment, memberId: string | null, weight: number) => {
        if (item.weight <= 1 || item.weight <= weight || weight <= 0) return;
 
        const newItem1: Equipment = {
@@ -265,16 +330,42 @@ export default function AllocationPage() {
               提示：從右側公裝表拖曳到隊員上，對公裝右鍵可以將重量拆解、合併相同名稱的裝備
             </div>
           </div>
-          <div className="flex gap-6">
-            {/* 左側成員 */}
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {members.map((m) => (
-                <DroppableMember key={m.id} member={m} />
-              ))}
-            </div>
+          <div className="flex gap-6 relative min-h-96">
+            {loading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded">
+                <div className="flex flex-col items-center">
+                  <div className="loader mb-2"></div>
+                  <p className="text-gray-600 text-2xl">資料加載中...</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* 左側成員 */}
+                <div className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {members.length === 0 ? (
+                    <div className="inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded">
+                      <div className="flex flex-col items-center">
+                        <p className="text-gray-600 text-2xl">
+                          還沒有加入任何隊員
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {members.map((m) => (
+                        <DroppableMember key={m.id} member={m} />
+                      ))}
+                    </>
+                  )}
+                </div>
 
-            {/* 右側裝備清單 */}
-            <DroppableEquipment id="equipmentList" items={equipment} />
+                {/* 右側裝備清單 */}
+                <DroppableEquipment
+                  id="equipmentList"
+                  items={equipment.filter((eq) => eq.ownerId.length === 0)}
+                />
+              </>
+            )}
           </div>
 
           {/* 拖曳預覽 */}
@@ -306,8 +397,8 @@ export default function AllocationPage() {
             }
             closeHandler={closeHandler}
             confirmHandler={(w) => {
-                handleSplit(splitItem, memberId, w);
-                closeHandler();
+              handleSplit(splitItem, memberId, w);
+              closeHandler();
             }}
           />
         )}
@@ -319,6 +410,13 @@ export default function AllocationPage() {
       id: member.id,
       data: { memberId: member.id },
     });
+    const [editMember, setEditMember] = useState<{
+      maxWeight: string;
+      edit: boolean;
+    }>({
+      maxWeight: "",
+      edit: false,
+    });
 
     const totalWeight = member.items.reduce((sum, i) => sum + i.weight, 0);
     const isOverWeight = totalWeight > member.maxWeight;
@@ -326,22 +424,67 @@ export default function AllocationPage() {
     return (
       <div
         ref={setNodeRef}
-        className={`p-4 rounded shadow flex flex-col transition 
-        ${isOver ? "bg-blue-50 border border-blue-300" : "bg-white"}
-        ${isOverWeight ? "bg-red-100 border border-red-500" : ""}
+        className={`relative p-4 rounded shadow flex flex-col transition
+        ${
+          editMember.edit
+            ? "col-span-2 md:col-span-2 lg:col-span-2"
+            : "col-span-1"
+        } 
+        ${
+          isOverWeight
+            ? "bg-red-100 border border-red-500 animate-shake"
+            : isOver
+            ? "bg-blue-50 border border-blue-300"
+            : "bg-white"
+        }
       `}
       >
+        <PiNotePencilFill
+          title="編輯內容"
+          onClick={() => {
+            console.log(member.id)
+            if (editMember.edit) {
+              console.log(editMember)
+              setTeam({
+                ...team,
+                members: team.members.map((m) => {
+                  return m.id?.toString() === member.id.toString()
+                    ? { ...m, maxWeight: Number(editMember.maxWeight) }
+                    : m;
+                }),
+              });
+              console.log(team.members);
+            }
+            setEditMember({
+              maxWeight: member.maxWeight.toString(),
+              edit: !editMember.edit,
+            });
+          }}
+          className={`cursor-pointer size-8 absolute top-0 right-0 
+          hover:bg-gray-300 rounded duration-200 trasition p-1 mr-2 mt-2 ${
+            editMember.edit && "bg-gray-300 rounded"
+          }`}
+        />
         <h3 className="font-semibold text-gray-700">{member.name}</h3>
-        <p className="text-sm text-gray-500">
-          總重量: {totalWeight} g / 最大負重: {member.maxWeight} g
-        </p>
+        {!editMember.edit ? (
+          <p className="text-sm text-gray-500">
+            總重量: {totalWeight} g / 最大負重: {member.maxWeight} g
+          </p>
+        ) : (
+          <InputComponent
+            input={{ type: "text" }}
+            direction
+            value={editMember.maxWeight}
+            label={"最大負重"}
+            inputChangeHandler={(v: string) =>
+              setEditMember({ ...editMember, maxWeight: v })
+            }
+          />
+        )}
+
         <div className="flex flex-wrap gap-2 mt-2">
           {member.items.map((item) => (
-            <DraggableTag
-              key={item.id}
-              item={item}
-              mId={member.id}
-            />
+            <DraggableTag key={item.id} item={item} mId={member.id} />
           ))}
           {member.items.length === 0 && (
             <span className="text-gray-400 text-sm">拖曳裝備到這裡</span>
@@ -413,10 +556,10 @@ export default function AllocationPage() {
           isDragging ? "opacity-50" : ""
         }`}
         onContextMenu={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setSplitItem(item);
-            if (mId) setMemberId(mId);
+          e.preventDefault();
+          e.stopPropagation();
+          setSplitItem(item);
+          if (mId) setMemberId(mId);
         }}
       >
         <span>

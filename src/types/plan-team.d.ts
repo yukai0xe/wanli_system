@@ -9,7 +9,7 @@ declare global {
     startDate: Date | string;
     endDate: Date | string;
     prepareDate: number;
-    members: Member[];
+    members: (Member & { maxWeight?: number })[];
     expectedTeamSize: number | null;
     transportType: string[];
   }

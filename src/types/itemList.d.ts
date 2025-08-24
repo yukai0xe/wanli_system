@@ -17,7 +17,7 @@ declare global {
         setPersonalItemList: (items: personalItem[]) => void;
         setTeamItemList: (items: teamItem[]) => void;
         getPersonalItemList: () => RowData[];
-        getTeamItemList: () => RowData[];
+        getTeamItemList: () => (Item & teamItem)[];
         addNewItemToDB: (newItem: item) => void;
     }
 }
