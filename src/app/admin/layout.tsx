@@ -103,7 +103,7 @@ const DashboardLayout = ({
   const teamLeftBarModel = [
     {
       id: 1,
-      displayText: "隊伍首頁",
+      displayText: "全部隊伍",
       path: prefixUrl + "/myTeam/"
     },
     {

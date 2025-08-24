@@ -107,7 +107,7 @@ model FileObject {
 }
 
 model Member {
-  id            Int       @id @default(autoincrement())
+  id            String    @id
   name          String
   role          TeamRole
   phone         String
@@ -169,13 +169,13 @@ model PlanTeamMeta {
   prepareDate  Int       // 同 PlanTeam
   startDate    String
 
-  leaderId     Int?       @unique
+  leaderId     String?       @unique
   leader       Member?    @relation("Leader", fields: [leaderId], references: [id])
 
-  guideId      Int?       @unique
+  guideId      String?       @unique
   guide        Member?    @relation("Guide", fields: [guideId], references: [id])
 
-  staybehindId Int?       @unique
+  staybehindId String?       @unique
   staybehind   Member?    @relation("Staybehind", fields: [staybehindId], references: [id])
 
   stats        Json
