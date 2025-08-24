@@ -30,16 +30,6 @@ export const AddNewTeamComponent = ({
       if (typeof phone === "string")
         updatedMembers[idx] = { ...updatedMembers[idx], phone };
     }
-    else {
-      updatedMembers.push({
-        name: name || "",
-        role: roleLabel,
-        phone: phone || "",
-        IDNumber: "",
-        studentNumber: "",
-      });
-    }
-
     setTeam({ members: updatedMembers });
   }
 

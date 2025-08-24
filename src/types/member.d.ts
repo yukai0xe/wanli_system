@@ -1,7 +1,7 @@
 
 declare global {
   interface Member {
-    id?: string;
+    id: string;
     name: string;
     role: TeamRole;
     phone: string;

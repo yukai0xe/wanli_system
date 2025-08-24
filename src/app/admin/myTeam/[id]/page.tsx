@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { timelineData } from "@/lib/viewModel/timeLine";
 import { useEffect, useState } from "react";
 import { Event, TeamRole, TransportType } from "@/types/enum";
-import { parseEnumKey } from "@/lib/utility";
+import { parseEnumKey, uuidToNumericId } from "@/lib/utility";
 import { PiNotePencilFill } from "react-icons/pi";
 import InputComponent from "@/app/components/form/input";
 import { FaPhoneAlt } from "react-icons/fa";
@@ -246,6 +246,7 @@ export default function TeamOverview() {
                                 members: [
                                   ...team.members,
                                   {
+                                    id: uuidToNumericId(),
                                     name: v,
                                     phone: "",
                                     IDNumber: "",
@@ -288,6 +289,7 @@ export default function TeamOverview() {
                               members: [
                                 ...team.members,
                                 {
+                                  id: uuidToNumericId(),
                                   name: "",
                                   phone: v,
                                   IDNumber: "",

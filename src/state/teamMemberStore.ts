@@ -4,6 +4,7 @@ import { TeamRole, Gender } from "@/types/enum";
 import { parseEnumKey } from "@/lib/utility";
 
 const initialMember: Member = {
+    id: "",
     name: "",
     studentNumber: "",
     IDNumber: "",

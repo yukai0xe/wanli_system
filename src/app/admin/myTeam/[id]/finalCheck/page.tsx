@@ -10,7 +10,7 @@ import { finalPlanType, TeamRole } from "@/types/enum";
 import {
   teamMemberFakeData as tmfake,
 } from "@/lib/viewModel/tableData";
-import { parseEnumKey, uuidToNumericId } from "@/lib/utility";
+import { parseEnumKey } from "@/lib/utility";
 
 const tabs = Object.values(finalPlanType).map((type) => {
   return {
@@ -61,7 +61,7 @@ const Page = () => {
     addNewMember: () => {
       setTeam({
         ...team,
-        members: [...team.members, { ...member, id: uuidToNumericId() }],
+        members: [...team.members, { ...member }],
       });
     },
     importNewMembers: () => {},
