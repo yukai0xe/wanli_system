@@ -11,7 +11,9 @@ export default function RootLayout({
   return (
     <Suspense>
       <Navbar />
-      <div style={{ paddingTop: '100px' }}>
+      <div
+        className="overflow-y-auto overflow-x-hidden w-screen h-screen pt-[100px]"
+      >
         {children}
       </div>
       <Footer />

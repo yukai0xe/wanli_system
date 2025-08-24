@@ -181,28 +181,26 @@ export default function AllocationPage() {
          weight: item.weight - weight,
        };
 
-       if (memberId) {
-         setMembers((prev) =>
-           prev.map((m) =>
-             m.id === memberId
-               ? {
-                   ...m,
-                   items: [
-                     ...m.items.filter((i) => i.id !== item.id),
-                     newItem1,
-                     newItem2,
-                   ],
-                 }
-               : m
-           )
-         );
-       } else {
-         setEquipment((prev) => [
-           ...prev.filter((e) => e.id !== item.id),
-           newItem1,
-           newItem2,
-         ]);
-       }
+      if (memberId) {
+        setTeamItemList([
+          ...teamItemList.filter((it) => it.itemId !== item.id),
+          {
+            itemId: newItem1.id,
+            ownerId: newItem1.ownerId,
+            quantity: newItem1.quantity,
+          },
+          {
+            itemId: newItem2.id,
+            ownerId: newItem2.ownerId,
+            quantity: newItem2.quantity,
+          },
+        ]);
+      }
+      setEquipment((prev) => [
+        ...prev.filter((e) => e.id !== item.id),
+        newItem1,
+        newItem2,
+      ]);
     };
 
     const handleMerge = (
@@ -238,78 +236,20 @@ export default function AllocationPage() {
         weight: sourceItem.weight + targetItem.weight,
       };
 
-      // 處理 source & target 的更新
-      if (source.memberId && target.memberId) {
-        // 成員 → 成員
-        setMembers((prev) =>
-            prev.map((m) => {
-                if (source.memberId === target.memberId && m.id === source.memberId) {
-                    return {
-                      ...m,
-                      items: [
-                        ...m.items.filter((i) => i.id !== sourceItem!.id && i.id !== targetItem!.id),
-                        mergedItem,
-                      ],
-                    };
-                }
-                if (m.id === source.memberId) {
-                    return {
-                        ...m,
-                        items: [
-                        ...m.items.filter((i) => i.id !== sourceItem!.id),
-                        mergedItem,
-                        ],
-                    };
-                }
-                if (m.id === target.memberId) {
-                    return {
-                        ...m,
-                        items: m.items.filter((i) => i.id !== targetItem!.id),
-                    };
-                }
-                return m;
-            })
-        );
-      } else if (!source.memberId && !target.memberId) {
-        // 裝備清單 → 裝備清單
-        setEquipment((prev) => [
-          ...prev.filter(
-            (i) => i.id !== sourceItem!.id && i.id !== targetItem!.id
-          ),
-          mergedItem,
-        ]);
-      } else if (source.memberId && !target.memberId) {
-        // 裝備清單 → 成員
-        setEquipment((prev) => prev.filter((i) => i.id !== targetItem!.id));
-        setMembers((prev) =>
-          prev.map((m) =>
-            m.id === source.memberId
-              ? {
-                  ...m,
-                  items: [
-                    ...m.items.filter((i) => i.id !== sourceItem!.id),
-                    mergedItem,
-                  ],
-                }
-              : m
-          )
-        );
-      } else if (!source.memberId && target.memberId) {
-        // 成員 → 裝備清單
-        setMembers((prev) =>
-          prev.map((m) =>
-            m.id === target.memberId
-              ? { ...m, items: m.items.filter((i) => i.id !== targetItem!.id) }
-              : m
-          )
-        );
-        setEquipment((prev) => [
-          ...prev.filter((i) => i.id !== sourceItem!.id),
-          mergedItem,
-        ]);
-      }
+      setTeamItemList([
+        ...teamItemList.filter((it) => ![sourceItem.id, targetItem.id].includes(it.itemId)),
+        {
+          itemId: mergedItem.id,
+          quantity: mergedItem.quantity,
+          ownerId: mergedItem.ownerId ? source.memberId! : target.memberId!
+        },
+      ]);
+      setEquipment((prev) => [
+        ...prev.filter((eq) => ![sourceItem.id, targetItem.id].includes(eq.id)),
+        mergedItem,
+      ]);
 
-        closeHandler();
+      closeHandler();
     };
     
 
@@ -380,10 +320,9 @@ export default function AllocationPage() {
         {splitItem && (
           <SplitAndCombineDialog
             splitItem={splitItem}
-            mergeCandidates={[
-              ...equipment,
-              ...members.flatMap((m) => m.items),
-            ].filter((e) => e.name === splitItem.name && e.id !== splitItem.id)}
+            mergeCandidates={equipment.filter(
+              (e) => e.name === splitItem.name && e.id !== splitItem.id
+            )}
             mergeHandler={(id) =>
               handleMerge(
                 { memberId: memberId, itemId: splitItem.id },
