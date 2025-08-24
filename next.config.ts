@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/wanli",
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/wanli",
+        permanent: true,
+      },
+    ];
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
