@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import EditableTable from "@/app/components/table/editTable";
-import { personalIteamListFakeData as pItemfake, teamItemListFakeData as tItemfake } from "@/lib/viewModel/tableData";
+import { personalIteamListFakeData as pItemfake, teamItemListFakeData as tItemfake } from "@/data/tableData";
 import {
   HiEllipsisHorizontal,
   HiSquaresPlus,
@@ -141,6 +141,25 @@ const ItemListTable: React.FC<{
     closeHandler();
   }
 
+  const editHandler = (newData: RowData[]) => {
+    if (isTeam) {
+      setTeamItemList(newData.map(d => ({
+        itemId: d.id,
+        quantity: d.quantity as string,
+        weight: d.weight,
+        ownerId: d.ownerId as string
+      })))
+    } else {
+      setPersonalItemList(
+        newData.map((d) => ({
+          itemId: d.id,
+          required: Boolean(d.required),
+          quantity: d.quantity as string,
+        }))
+      );
+    }
+  }
+
   const renderDialog = () => {
     switch (eventType) {
       case EventType.createNewItem:
@@ -156,7 +175,7 @@ const ItemListTable: React.FC<{
         return (
           <GetItemFromDB
             open={open}
-            data={itemsFromDB}
+            data={!isTeam ? itemsFromDB : itemsFromDB.filter(it => ![ItemType.PersonalEquip, ItemType.Clothing].includes(ItemType[it.type as unknown as keyof typeof ItemType]))}
             handleClose={closeHandler}
             handleConfirm={(ids: Set<string>) => addNewItemsFromDB(ids)}
           />
@@ -271,21 +290,28 @@ const ItemListTable: React.FC<{
                     rowsSortingProp={rowsSortingProp}
                     dataSortingProp={object.data}
                     q={q}
+                    onDataChange={(newData) => editHandler(newData)}
                   />
                 )}
                 <div className="flex justify-end">
-                  {rowsSortingProp.map((r) =>
-                    r.calc
-                      ? r.calc.map((v) => (
-                          <span
-                            key={`${idx}-${key}`}
-                            className="text-sm text-gray-600"
-                          >
-                            {v.label}: {v.f(object.data)}
-                          </span>
-                        ))
-                      : null
-                  )}
+                  {rowsSortingProp.map((r) => {
+                    if (r.calc) {
+                      return r.calc.map((v) => {
+                        const result = v.fn(object.data);
+                          return (
+                            <span
+                              key={`${idx}-${key}`}
+                              className="text-sm text-gray-600"
+                            >
+                              {v.label}: {result}
+                            </span>
+                          )
+                        }
+                      )
+                    }
+                    return null;
+                  })
+                }
                 </div>
               </div>
             );

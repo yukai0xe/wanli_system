@@ -1,8 +1,6 @@
 import { parseEnumKey } from "@/lib/utility";
 import { Gender } from "@/types/enum";
 
-
-
 export const teamMemberFakeData: {rowsHeader: EditableRowHeader[], rowsData: RowData[], keyOrder: string[]} = {
     rowsHeader: [
     {
@@ -272,8 +270,13 @@ export const teamItemListFakeData: { rowsHeader: EditableRowHeader[], rowsData: 
       calc: [
           {
             label: "總重量",
-            f: (data: RowData[]) => {
-              return data.reduce((sum: number, row: RowData) => sum + Number(row.weight || 0), 0).toString() + "g"
+          fn: (data: { weight: string; quantity: string; }[]) => {
+              console.log(data);
+              return data.reduce((sum, row) => {
+                const weight = Number(row.weight || 0);
+                const quantity = isNaN(Number(row.quantity)) ? 1 : Number(row.quantity);
+                return sum + weight * quantity;
+              }, 0).toString() + "g";
             }
           }
         ],

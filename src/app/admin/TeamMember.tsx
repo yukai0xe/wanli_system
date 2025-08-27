@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import EditableTable from "../components/table/editTable";
-import { teamMemberFakeData } from "@/lib/viewModel/tableData";
+import { teamMemberFakeData } from "@/data/tableData";
 import { AddNewTeamMember } from "@/app/components/dialog/TeamMemberDialog";
 import {
   HiEllipsisHorizontal,
@@ -111,7 +111,7 @@ const TeamMemberTable: React.FC<{
               </div>
             </div>
           </div>
-          
+
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded">
               <div className="flex flex-col items-center">
@@ -134,7 +134,10 @@ const TeamMemberTable: React.FC<{
                 {isOpen[0] && (
                   <EditableTable
                     rowsSortingProp={rowsSortingProp}
-                    dataSortingProp={dataSortingProp.filter((d) => filterLeader(d))}
+                    dataSortingProp={dataSortingProp.filter((d) =>
+                      filterLeader(d)
+                    )}
+                    onDataChange={() => {}}
                     q={q}
                   />
                 )}
@@ -156,12 +159,17 @@ const TeamMemberTable: React.FC<{
                     dataSortingProp={dataSortingProp.filter(
                       (d) => !filterLeader(d)
                     )}
+                    onDataChange={() => {}}
                     q={q}
                   />
                 )}
               </div>
               {isOpen && (
-                <AddNewTeamMember open={open} handleClose={closeHandler} handleConfirm={feature.addNewMember} />
+                <AddNewTeamMember
+                  open={open}
+                  handleClose={closeHandler}
+                  handleConfirm={feature.addNewMember}
+                />
               )}
             </>
           )}

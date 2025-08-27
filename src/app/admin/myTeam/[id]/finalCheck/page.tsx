@@ -7,9 +7,10 @@ import { useState, useRef, useEffect } from "react";
 import TeamMember from "@/app/admin/TeamMember";
 import ItemList from "@/app/admin/ItemList";
 import { finalPlanType, TeamRole } from "@/types/enum";
+import RoutePlan from "@/app/admin/RoutePlan";
 import {
   teamMemberFakeData as tmfake,
-} from "@/lib/viewModel/tableData";
+} from "@/data/tableData";
 import { parseEnumKey } from "@/lib/utility";
 
 const tabs = Object.values(finalPlanType).map((type) => {
@@ -87,6 +88,10 @@ const Page = () => {
         return (
           <ItemList key="team" isTeam/>
         );
+      case finalPlanType.route:
+        return (
+          <RoutePlan />
+        )
       case finalPlanType.BPlan:
         return (
           <div className="w-full p-5 flex gap-y-5 flex-col justify-start">

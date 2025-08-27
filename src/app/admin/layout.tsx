@@ -104,23 +104,23 @@ const DashboardLayout = ({
     {
       id: 1,
       displayText: "全部隊伍",
-      path: prefixUrl + "/myTeam/"
+      path: prefixUrl + "/myTeam/",
     },
     {
       id: 2,
-      displayText: "行前會模板",
-      path: prefixUrl + "/myTeam/" + teamId + "/firstMeeting"
+      displayText: "留守計劃書",
+      path: prefixUrl + "/myTeam/" + teamId + "/finalCheck",
     },
     {
       id: 3,
-      displayText: "留守計劃書",
-      path: prefixUrl + "/myTeam/" + teamId + "/finalCheck"
+      displayText: "公裝分配",
+      path: prefixUrl + "/myTeam/" + teamId + "/finalCheck/allocation",
     },
     {
       id: 4,
-      displayText: "公裝分配",
-      path: prefixUrl + "/myTeam/" + teamId + "/finalCheck/allocation"
-    }
+      displayText: "行程比較",
+      path: prefixUrl + "/myTeam/" + teamId + "/finalCheck/routeCompare",
+    },
   ];
 
   const renderIcon = (id: number) => {

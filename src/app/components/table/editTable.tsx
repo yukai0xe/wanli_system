@@ -31,7 +31,8 @@ const EditableTable: React.FC<{
     rowsSortingProp: EditableRowHeader[];
     dataSortingProp: RowData[];
     q: string;
-}> = ({ rowsSortingProp, dataSortingProp, q }) => {
+    onDataChange: (newData: RowData[]) => void;
+}> = ({ rowsSortingProp, dataSortingProp, q, onDataChange }) => {
   const rowHeaders: EditableRowHeader[] =
     rowsSortingProp
       .filter(
@@ -103,8 +104,8 @@ const EditableTable: React.FC<{
     });
     if (!isValid) return;
 
-    setRowData((prev) =>
-      prev.map((r) => {
+    onDataChange(
+      rowData.map((r) => {
         if (r.id === editingId) {
           return { ...(r as RowData), ...(draft as RowData) };
         } else return r;

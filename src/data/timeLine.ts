@@ -7,7 +7,7 @@ export const timelineData = [
     title: "還未設置時間",
     label: Event.firstMeetingState,
     labelClassName: "uk-label-success",
-    moreAction: true,
+    moreAction: false,
     link: "/firstMeeting",
     buttonLabel: "查看",
   },

@@ -65,7 +65,7 @@ declare global {
     calc?: [
       {
         label: string,
-        f: (data: RowData[]) => string
+        fn: (data) => string
       }
     ] 
   }

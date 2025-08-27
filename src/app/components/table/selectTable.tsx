@@ -116,37 +116,41 @@ const SelectableTable: React.FC<{
         </thead>
         <tbody className="max-w-full">
           {filtered.map((row) => (
-            <tr
-              key={row.id}
-              className={`border-b last:border-0 hover:bg-gray-50/60 ${
-                selectedRows.has(row.id) ? "bg-blue-50" : ""
-              }`}
-              onClick={() => toggleRow(row.id)}
-            >
-              <td
-                className="px-4 py-3 w-[40px]"
-                style={{ width: "max-content" }}
+            <React.Fragment key={row.id}>
+              <tr
+                key={row.id}
+                className={`border-b last:border-0 hover:bg-gray-50/60 ${
+                  selectedRows.has(row.id) ? "bg-blue-50" : ""
+                }`}
+                onClick={() => toggleRow(row.id)}
               >
-                <input
-                  type="checkbox"
-                  checked={selectedRows.has(row.id)}
-                  onChange={() => toggleRow(row.id)}
-                />
-              </td>
-              {Object.entries(row)
-                .filter(([k]) => k !== "id" && k !== "isLeader" && k !== "type")
-                .map(([key, value], idx) => (
-                  <td
-                    key={idx}
-                    className="px-4 py-3 align-middle w-[150px]"
-                    style={{ width: "max-content" }}
-                  >
-                    <span className="text-sm font-medium text-gray-900">
-                      {renderValue(key, value)}
-                    </span>
-                  </td>
-                ))}
-            </tr>
+                <td
+                  className="px-4 py-3 w-[40px]"
+                  style={{ width: "max-content" }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.has(row.id)}
+                    onChange={() => toggleRow(row.id)}
+                  />
+                </td>
+                {Object.entries(row)
+                  .filter(
+                    ([k]) => k !== "id" && k !== "isLeader" && k !== "type"
+                  )
+                  .map(([key, value], idx) => (
+                    <td
+                      key={idx}
+                      className="px-4 py-3 align-middle w-[150px]"
+                      style={{ width: "max-content" }}
+                    >
+                      <span className="text-sm font-medium text-gray-900">
+                        {renderValue(key, value)}
+                      </span>
+                    </td>
+                  ))}
+              </tr>
+            </React.Fragment>
           ))}
           {filtered.length === 0 && (
             <tr>

@@ -3,7 +3,7 @@
 // import { useUserStore } from "@/state/store";
 import styles from "@/assets/styles/teamMember.module.css"
 import TeamMember from "@/app/admin/TeamMember";
-import { teamMemberFakeData } from "@/lib/viewModel/tableData";
+import { teamMemberFakeData } from "@/data/tableData";
 
 const MainPage = () => {
   // const username = useUserStore((state: UserState) => state.username);

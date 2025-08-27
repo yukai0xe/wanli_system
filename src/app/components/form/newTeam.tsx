@@ -2,7 +2,7 @@ import styles from "@/assets/styles/dashboardLayout.module.css";
 import { useDraftTeamStore } from "@/state/planTeamStore";
 import dayjs from "dayjs";
 import { useState, useEffect } from "react";
-import { inputModel } from "@/lib/viewModel/newTeam";
+import { inputModel } from "@/data/newTeam";
 import RadioStyles from "@/assets/styles/components/radio.module.css";
 import InputStyles from "@/assets/styles/components/input.module.css";
 import SelectStyles from "@/assets/styles/components/select.module.css";

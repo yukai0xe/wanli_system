@@ -23,3 +23,35 @@ export function uuidToNumericId(): string {
   }
   return numeric.slice(0, 16);
 }
+
+export function numberToChinese(num: number): string {
+  const units = ["", "十", "百", "千", "萬", "億"]
+  const chars = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"]
+
+  if (num === 0) return "零"
+
+  let str = ""
+  let unitPos = 0
+  let zero = true
+
+  while (num > 0) {
+    const section = num % 10
+    if (section === 0) {
+      if (!zero) {
+        zero = true
+        str = chars[0] + str
+      }
+    } else {
+      zero = false
+      str = chars[section] + units[unitPos] + str
+    }
+    unitPos++
+    num = Math.floor(num / 10)
+  }
+
+  if (str.startsWith("一十")) {
+    str = str.substring(1)
+  }
+
+  return str
+}

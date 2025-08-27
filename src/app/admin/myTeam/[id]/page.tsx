@@ -2,7 +2,7 @@
 import { Timeline, TimelineItem, MoreTimeLineItem } from "@/app/components/timeline";
 import { usePlanTeamStore, usePlanTeamMetaStore } from "@/state/planTeamStore";
 import { useRouter } from "next/navigation";
-import { timelineData } from "@/lib/viewModel/timeLine";
+import { timelineData } from "@/data/timeLine";
 import { useEffect, useState } from "react";
 import { Event, TeamRole, TransportType } from "@/types/enum";
 import { parseEnumKey, uuidToNumericId } from "@/lib/utility";
