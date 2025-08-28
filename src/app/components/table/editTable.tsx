@@ -184,15 +184,15 @@ const EditableTable: React.FC<{
   return (
     <div className="overflow-x-auto">
       <table
-        className="table-fixed text-left min-w-full border-collapse"
+        className="table-fixed text-left min-w-full border-collapse border border-gray-200 text-sm"
         style={{ width: "max-content" }}
       >
-        <thead className="max-w-full">
-          <tr className="border-b bg-gray-50 text-sm">
-            <th className="px-4 py-3 text-left">操作</th>
+        <thead className="border-b max-w-full">
+          <tr className="bg-gray-50 text-sm">
+            <th className="px-4 py-3 text-left border">操作</th>
             {rowHeaders.map((row, idx) => {
               return (
-                <th key={idx} className="px-4 py-3">
+                <th key={idx} className="px-4 py-3 border">
                   <SortButton
                     sortObject={{ sortKey, sortAsc }}
                     handleClick={() => sortHandler(row.key)}
@@ -216,7 +216,7 @@ const EditableTable: React.FC<{
                       : "hover:bg-gray-50/60"
                   }`}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 border">
                     <div className="flex justify-strart gap-2">
                       {isEditing ? (
                         <>
@@ -259,7 +259,7 @@ const EditableTable: React.FC<{
                       <td
                         style={{ width: "max-content" }}
                         key={idx}
-                        className="px-4 py-3 align-middle w-[150px]"
+                        className="px-4 py-3 border align-middle w-[150px]"
                       >
                         <span className="text-sm font-medium text-gray-900">
                           {renderValue(key, value)}

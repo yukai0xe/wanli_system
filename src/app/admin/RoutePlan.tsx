@@ -36,61 +36,87 @@ const RoutePlanPage = () => {
   const [data, setData] = useState<Route[]>(routeData);
     
      const [isModalOpen, setIsModalOpen] = useState(false);
-     const [editRow, setEditRow] = useState<number | null>(null);
      const [tempDeparture, setTempDeparture] = useState("");
      const [tempArrival, setTempArrival] = useState("");
 
-     const openModal = () => {
-        setEditRow(activeTab);  
-        const dates = Object.keys(data[activeTab]);
-        setTempDeparture(dates[0]);
-        setTempArrival(dates[dates.length - 1]);
+    const openModal = () => {
+        if (activeTab >= data.length) {
+            setTempDeparture("");
+            setTempArrival("");
+        }
+        else {
+            const dates = Object.keys(data[activeTab]);
+            setTempDeparture(dates[0]);
+            setTempArrival(dates[dates.length - 1]);
+        }
         setIsModalOpen(true);
      };
 
-     const saveTime = () => {
-        if (editRow === null) return;
+    const saveTime = () => {
         const newData = data.map((tab) => {
-        const newTab: Route = {};
-        for (const key in tab) {
-            newTab[key] = [...tab[key]];
-        }
-        return newTab;
+            const newTab: Route = {};
+            for (const key in tab) {
+                newTab[key] = [...tab[key]];
+            }
+            return newTab;
         });
-        newData[activeTab] = {};
+
         const diffTime = new Date(tempArrival).getTime() - new Date(tempDeparture).getTime(); 
         if (diffTime < 0) return;
         const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        const oldDates = Object.keys(data[activeTab]); 
-        console.log(oldDates)
         let currentDate = tempDeparture;
-        for (let i = 0; i < diffDays; i++){
-            if (oldDates.includes(currentDate)) newData[activeTab][currentDate] = data[activeTab][currentDate];
-            else newData[activeTab][currentDate] = [];
-            const dateObj = new Date(currentDate);
-            dateObj.setDate(dateObj.getDate() + 1);
-            currentDate = dateObj.toISOString().split("T")[0];
-         }
-        
+
+        if (activeTab == data.length) {
+            newData.push({});
+            for (let i = 0; i < diffDays; i++) {
+              newData[activeTab][currentDate] = [];
+              const dateObj = new Date(currentDate);
+              dateObj.setDate(dateObj.getDate() + 1);
+              currentDate = dateObj.toISOString().split("T")[0];
+            }
+        } 
+        else {
+            newData[activeTab] = {};
+            const oldDates = Object.keys(data[activeTab]);
+            for (let i = 0; i < diffDays; i++) {
+                if (oldDates.includes(currentDate)) newData[activeTab][currentDate] = data[activeTab][currentDate];
+                else newData[activeTab][currentDate] = [];
+                const dateObj = new Date(currentDate);
+                dateObj.setDate(dateObj.getDate() + 1);
+                currentDate = dateObj.toISOString().split("T")[0];
+            }
+        } 
         setData(newData);
         setIsModalOpen(false);
-     };
+    };
+
+    const handleCancel = () => {
+        setActiveTab(0);
+        setIsModalOpen(false);
+    }
     
     
     useEffect(() => {
-        if (data.length > 0) setTabs(prev => {
-            for (let i = tabs.length; i < data.length; i++){
-                prev.push("參考行程" + numberToChinese(i));
-            }
-            return prev;
-        })
-    }, [data])
+        if (data.length > 0) {
+            setTabs(prev => {
+                const newTabs = [...prev];
+                for (let i = prev.length; i < data.length; i++)
+                    newTabs.push("參考行程" + numberToChinese(i));
+                return newTabs;
+            })
+        }
+    }, [data.length])
     
     const [editing, setEditing] = useState<{
       row: number;
       field: string;
       date: string;
     } | null>(null);
+
+    const handleAddRoute = () => {
+        setActiveTab(tabs.length);
+        openModal();
+    }
 
     const handleAddRow = (date: string) => {
       setData((prev) => {
@@ -283,7 +309,7 @@ const RoutePlanPage = () => {
           </button>
         ))}
         <button
-          onClick={() => setTabs([...tabs, `參考行程${tabs.length}`])}
+          onClick={() => handleAddRoute()}
           className="px-4 py-2 rounded-2xl bg-green-100 text-green-700 hover:bg-green-200 text-sm"
         >
           + 新增
@@ -295,7 +321,7 @@ const RoutePlanPage = () => {
 
       {/* 表格內容 */}
       <div className="space-y-8">
-        {Object.entries(data[activeTab]).map(([date, rows]) => (
+        {Object.entries(data[activeTab] || {}).map(([date, rows]) => (
           <div key={date} className="space-y-2">
             <div className="flex gap-x-3 items-center">
               <LuMapPinPlus
@@ -423,7 +449,7 @@ const RoutePlanPage = () => {
             </div>
             <div className="flex justify-end space-x-2 mt-6">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => handleCancel()}
                 className="px-3 py-1 rounded border"
               >
                 取消

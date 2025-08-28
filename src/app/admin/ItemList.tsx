@@ -263,59 +263,63 @@ const ItemListTable: React.FC<{
           <div className="text-xl min-h-96 flex w-full justify-center items-center">
             沒有任何裝備
           </div>
-        ) : (
-          Object.entries(groupData).map(([key, object], idx) => {
-            return (
-              <div key={idx} className="mb-5">
-                <h3 className="text-xl pb-2">
-                  {(ItemType as Record<string, string>)[key]}
-                  <span
-                    onClick={() => {
-                      setGroupData({
-                        ...groupData,
-                        [key]: {
-                          ...object,
-                          isOpen: !object.isOpen,
-                        },
-                      });
-                    }}
-                    className="cursor-pointer"
-                  >
-                    {" "}
-                    {object.isOpen ? "▲" : "▼"}
-                  </span>
-                </h3>
-                {object.isOpen && (
-                  <EditableTable
-                    rowsSortingProp={rowsSortingProp}
-                    dataSortingProp={object.data}
-                    q={q}
-                    onDataChange={(newData) => editHandler(newData)}
-                  />
-                )}
-                <div className="flex justify-end">
-                  {rowsSortingProp.map((r) => {
-                    if (r.calc) {
-                      return r.calc.map((v) => {
-                        const result = v.fn(object.data);
-                          return (
-                            <span
-                              key={`${idx}-${key}`}
-                              className="text-sm text-gray-600"
-                            >
-                              {v.label}: {result}
-                            </span>
-                          )
+          ) : (
+            <div className="grid grid-cols-2 gap-6">
+              {
+                Object.entries(groupData).map(([key, object], idx) => {
+                  return (
+                    <div key={idx} className="mb-5">
+                      <h3 className="text-xl pb-2">
+                        {(ItemType as Record<string, string>)[key]}
+                        <span
+                          onClick={() => {
+                            setGroupData({
+                              ...groupData,
+                              [key]: {
+                                ...object,
+                                isOpen: !object.isOpen,
+                              },
+                            });
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {" "}
+                          {object.isOpen ? "▲" : "▼"}
+                        </span>
+                      </h3>
+                      {object.isOpen && (
+                        <EditableTable
+                          rowsSortingProp={rowsSortingProp}
+                          dataSortingProp={object.data}
+                          q={q}
+                          onDataChange={(newData) => editHandler(newData)}
+                        />
+                      )}
+                      <div className="flex justify-end pt-2">
+                        {rowsSortingProp.map((r) => {
+                          if (r.calc) {
+                            return r.calc.map((v) => {
+                              const result = v.fn(object.data);
+                              return (
+                                <span
+                                  key={`${idx}-${key}`}
+                                  className="text-sm text-gray-600"
+                                >
+                                  {v.label}: {result}
+                                </span>
+                              )
+                            }
+                            )
+                          }
+                          return null;
+                        })
                         }
-                      )
-                    }
-                    return null;
-                  })
-                }
-                </div>
-              </div>
-            );
-          })
+                      </div>
+                    </div>
+                  );
+                })
+              }
+            </div>
         )}
       </div>
       {open && renderDialog()}
