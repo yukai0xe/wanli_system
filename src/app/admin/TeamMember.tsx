@@ -66,17 +66,8 @@ const TeamMemberTable: React.FC<{
         <div className="relative min-h-96 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* <h1 className="text-xl font-semibold tracking-tight">使用者清單</h1> */}
-            <div className="mt-4 text-xs text-gray-500">
-              提示：點右側「三個點的符號」可以新增人員
-            </div>
-            <div className="w-2/3 flex items-center justify-end gap-2">
+            <div className="flex items-center justify-start gap-2">
               <div className="flex items-center gap-x-3">
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="搜尋名稱 / Email / 角色"
-                  className="w-64 rounded-xl border border-gray-300 px-3 py-2 text-sm outline-none ring-0 focus:border-gray-400 focus:outline-none focus:ring-0"
-                />
                 <div className="relative">
                   <HiEllipsisHorizontal
                     className={`size-8 cursor-pointer hover:bg-gray-100 rounded ${
@@ -85,7 +76,7 @@ const TeamMemberTable: React.FC<{
                     onClick={() => setShowBtn(!showBtn)}
                   />
                   {showBtn && (
-                    <div className="absolute top-10 right-0 flex flex-col gap-2 text-left w-64 bg-white rounded shadow-2xl">
+                    <div className="absolute top-10 left-0 flex flex-col gap-2 text-left w-64 bg-white rounded shadow-2xl">
                       <button
                         className="inline-flex items-center gap-x-2 text-left hover:bg-gray-100 text-gray-800 px-4 py-3 transition"
                         onClick={openHandler}
@@ -107,6 +98,15 @@ const TeamMemberTable: React.FC<{
                       </button>
                     </div>
                   )}
+                </div>
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="搜尋名稱 / Email / 角色"
+                  className="w-64 rounded-xl border border-gray-300 px-3 py-2 text-sm outline-none ring-0 focus:border-gray-400 focus:outline-none focus:ring-0"
+                />
+                <div className="mt-4 text-xs text-gray-500">
+                  提示：點左側「三個點的符號」可以新增人員
                 </div>
               </div>
             </div>

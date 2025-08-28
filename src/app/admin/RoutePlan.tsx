@@ -3,6 +3,8 @@ import { LuMapPinPlus } from "react-icons/lu";
 import { numberToChinese, uuidToNumericId } from "@/lib/utility";
 import { useEffect, useState } from "react";
 import { routeData } from "@/data/routeData";
+import { usePlanTeamStore } from "@/state/planTeamStore";
+import { useRouter } from "next/navigation";
 
 type RecordPoint = {
     point: string;
@@ -30,7 +32,9 @@ function minutesToTime(m: number): string {
 
 const RoutePlanPage = () => {
   const [tabs, setTabs] = useState(["預計行程"]);
-  const [activeTab, setActiveTab] = useState(0);
+    const [activeTab, setActiveTab] = useState(0);
+    const teamId = usePlanTeamStore(state => state.id);
+    const router = useRouter();
 
   // 假資料：日期區分
   const [data, setData] = useState<Route[]>(routeData);
@@ -91,7 +95,7 @@ const RoutePlanPage = () => {
     };
 
     const handleCancel = () => {
-        setActiveTab(0);
+        if(activeTab === data.length) setActiveTab(0);
         setIsModalOpen(false);
     }
     
@@ -225,56 +229,63 @@ const RoutePlanPage = () => {
         const n = rows.length;
 
         switch (field) {
-          case "depart":
-            if (typeof newValue === "string") {
-              const diff =
-                timeToMinutes(newValue) - timeToMinutes(rows[rowIdx].depart);
-              rows.forEach((r) => {
-                r.depart = minutesToTime(timeToMinutes(r.depart) + diff);
-                r.arrive = minutesToTime(timeToMinutes(r.arrive) + diff);
-              });
-            }
-            break;
-          case "arrive":
-            if (typeof newValue === "string") {
-              const diff =
-                timeToMinutes(newValue) - timeToMinutes(rows[rowIdx].arrive);
-              rows.forEach((r) => {
-                r.depart = minutesToTime(timeToMinutes(r.depart) + diff);
-                r.arrive = minutesToTime(timeToMinutes(r.arrive) + diff);
-              });
-            }
-            break;
-          case "duration":
-            if (!isNaN(Number(newValue))) {
-              const delta = Number(newValue) - rows[rowIdx].duration;
-              for (let i = rowIdx; i < n; i++) {
-                if(i === rowIdx) rows[i].duration += delta;
-                rows[i].arrive = minutesToTime(
-                  timeToMinutes(rows[i].depart) + rows[i].duration
-                );
-                if (i < n - 1) {
-                  rows[i + 1].depart = minutesToTime(
-                    timeToMinutes(rows[i].arrive) + rows[i].rest
-                  );
+            case "depart":
+                if (typeof newValue === "string") {
+                const diff =
+                    timeToMinutes(newValue) - timeToMinutes(rows[rowIdx].depart);
+                rows.forEach((r) => {
+                    r.depart = minutesToTime(timeToMinutes(r.depart) + diff);
+                    r.arrive = minutesToTime(timeToMinutes(r.arrive) + diff);
+                });
                 }
-              }
-            }
-            break;
-          case "rest":
-            if (!isNaN(Number(newValue))) {
-              const delta = Number(newValue) - rows[rowIdx].rest;
-              for (let i = rowIdx; i < n - 1; i++) {
-                if (i === rowIdx) rows[i].rest += delta;
-                rows[i + 1].depart = minutesToTime(
-                  timeToMinutes(rows[i].arrive) + rows[i].rest
-                );
-                rows[i + 1].arrive = minutesToTime(
-                  timeToMinutes(rows[i + 1].depart) + rows[i + 1].duration
-                );
-              }
-            }
-            break;
+                break;
+            case "arrive":
+                if (typeof newValue === "string") {
+                const diff =
+                    timeToMinutes(newValue) - timeToMinutes(rows[rowIdx].arrive);
+                rows.forEach((r) => {
+                    r.depart = minutesToTime(timeToMinutes(r.depart) + diff);
+                    r.arrive = minutesToTime(timeToMinutes(r.arrive) + diff);
+                });
+                }
+                break;
+            case "duration":
+                if (!isNaN(Number(newValue))) {
+                const delta = Number(newValue) - rows[rowIdx].duration;
+                for (let i = rowIdx; i < n; i++) {
+                    if(i === rowIdx) rows[i].duration += delta;
+                    rows[i].arrive = minutesToTime(
+                    timeToMinutes(rows[i].depart) + rows[i].duration
+                    );
+                    if (i < n - 1) {
+                    rows[i + 1].depart = minutesToTime(
+                        timeToMinutes(rows[i].arrive) + rows[i].rest
+                    );
+                    }
+                }
+                }
+                break;
+            case "rest":
+                if (!isNaN(Number(newValue))) {
+                const delta = Number(newValue) - rows[rowIdx].rest;
+                for (let i = rowIdx; i < n - 1; i++) {
+                    if (i === rowIdx) rows[i].rest += delta;
+                    rows[i + 1].depart = minutesToTime(
+                    timeToMinutes(rows[i].arrive) + rows[i].rest
+                    );
+                    rows[i + 1].arrive = minutesToTime(
+                    timeToMinutes(rows[i + 1].depart) + rows[i + 1].duration
+                    );
+                }
+                }
+                break;
+            case "point":
+                rows[rowIdx].point = newValue;
+                break;
+            case "note":
+                rows[rowIdx].note = newValue;
+                break;
+
         }
 
         newData[activeTab][date] = rows;
@@ -287,40 +298,53 @@ const RoutePlanPage = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white p-6">
       {/* Tab 切換列 */}
-      <div className="flex gap-2 pb-5">
-        <button
-          onClick={() => openModal()}
-          className="px-6 py-2 rounded-2xl bg-yellow-400 text-stone-700 hover:bg-yellow-500 text-sm"
-        >
-          修改日期
-        </button>
-        {tabs.map((tab, idx) => (
+      <div className="flex pb-4 justify-between items-center">
+        <div className="flex gap-2">
           <button
-            key={idx}
-            onClick={() => setActiveTab(idx)}
-            className={`px-4 py-2 rounded-2xl text-sm font-medium transition
+            onClick={() => openModal()}
+            className="px-6 py-2 rounded-2xl bg-yellow-400 text-stone-700 hover:bg-yellow-500 text-sm"
+          >
+            修改日期
+          </button>
+          {tabs.map((tab, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveTab(idx)}
+              className={`px-4 py-2 rounded-2xl text-sm font-medium transition
               ${
                 activeTab === idx
                   ? "bg-blue-500 text-white shadow"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
+            >
+              {tab}
+            </button>
+          ))}
+          <button
+            onClick={() => handleAddRoute()}
+            className="px-4 py-2 rounded-2xl bg-green-100 text-green-700 hover:bg-green-200 text-sm"
           >
-            {tab}
+            + 新增參考行程
           </button>
-        ))}
-        <button
-          onClick={() => handleAddRoute()}
-          className="px-4 py-2 rounded-2xl bg-green-100 text-green-700 hover:bg-green-200 text-sm"
-        >
-          + 新增
-        </button>
-        <div className="mt-4 text-xs text-gray-500">
-          提示：左鍵點擊表格即可編輯，右鍵點擊即可刪除，每個日期左邊的圖示可以新增紀錄點
         </div>
+        <button
+          className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
+          onClick={() =>
+            router.push(`/admin/myTeam/${teamId}/finalCheck/routeCompare`)
+          }
+        >
+          行程比較
+        </button>
+      </div>
+      <div className="text-xs text-gray-500">
+        提示 1：左鍵點擊表格即可編輯，右鍵點擊即可刪除，每個日期左邊的圖示可以新增紀錄點。
+      </div>
+      <div className="text-xs text-gray-500">
+        提示 2：修改「出發時間」、「抵達時間」、「行進時間」、「休息時間」都會自動計算整個行程的時間
       </div>
 
       {/* 表格內容 */}
-      <div className="space-y-8">
+      <div className="space-y-8 mt-4">
         {Object.entries(data[activeTab] || {}).map(([date, rows]) => (
           <div key={date} className="space-y-2">
             <div className="flex gap-x-3 items-center">
@@ -384,30 +408,30 @@ const RoutePlanPage = () => {
                           editing?.field === field &&
                           editing?.date === date ? (
                             <input
-                                type="text"
-                                autoFocus
-                                defaultValue={row[field as keyof typeof row]}
-                                onBlur={(e) => {
-                                    setEditing(null);
-                                    handleTimeChange(
-                                        date,
-                                        rowIdx,
-                                        field,
-                                        e.currentTarget.value
-                                    );
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        setEditing(null);
-                                        handleTimeChange(
-                                            date,
-                                            rowIdx,
-                                            field,
-                                            e.currentTarget.value
-                                        )
-                                    } 
-                                }}
-                                className="w-full h-full bg-transparent border-none outline-none px-0 py-0 text-sm"
+                              type="text"
+                              autoFocus
+                              defaultValue={row[field as keyof typeof row]}
+                              onBlur={(e) => {
+                                setEditing(null);
+                                handleTimeChange(
+                                  date,
+                                  rowIdx,
+                                  field,
+                                  e.currentTarget.value
+                                );
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  setEditing(null);
+                                  handleTimeChange(
+                                    date,
+                                    rowIdx,
+                                    field,
+                                    e.currentTarget.value
+                                  );
+                                }
+                              }}
+                              className="w-full h-full bg-transparent border-none outline-none px-0 py-0 text-sm"
                             />
                           ) : (
                             row[field as keyof typeof row]
