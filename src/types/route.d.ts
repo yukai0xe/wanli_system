@@ -1,5 +1,6 @@
 declare global {
     type RecordPoint = {
+        id: string;
         point: string;
         arrive: string;
         depart: string;
