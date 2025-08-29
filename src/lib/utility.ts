@@ -55,3 +55,16 @@ export function numberToChinese(num: number): string {
 
   return str
 }
+
+export function timeToMinutes(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+export function minutesToTime(m: number): string {
+  const hours = Math.floor(m / 60) % 24;
+  const minutes = m % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
+}

@@ -1,34 +1,10 @@
 "use client";
 import { LuMapPinPlus } from "react-icons/lu";
-import { numberToChinese, uuidToNumericId } from "@/lib/utility";
+import { numberToChinese, uuidToNumericId, timeToMinutes, minutesToTime } from "@/lib/utility";
 import { useEffect, useState } from "react";
 import { routeData } from "@/data/routeData";
 import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useRouter } from "next/navigation";
-
-type RecordPoint = {
-    point: string;
-    depart: string;
-    arrive: string;
-    duration: number;
-    rest: number;
-    note: string;
-}
-
-type Route = Record<string, RecordPoint[]>
-
-function timeToMinutes(t: string): number {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function minutesToTime(m: number): string {
-  const hours = Math.floor(m / 60);
-  const minutes = m % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
-}
 
 const RoutePlanPage = () => {
   const [tabs, setTabs] = useState(["預計行程"]);
@@ -251,32 +227,30 @@ const RoutePlanPage = () => {
                 break;
             case "duration":
                 if (!isNaN(Number(newValue))) {
-                const delta = Number(newValue) - rows[rowIdx].duration;
-                for (let i = rowIdx; i < n; i++) {
-                    if(i === rowIdx) rows[i].duration += delta;
-                    rows[i].arrive = minutesToTime(
-                    timeToMinutes(rows[i].depart) + rows[i].duration
-                    );
-                    if (i < n - 1) {
-                    rows[i + 1].depart = minutesToTime(
-                        timeToMinutes(rows[i].arrive) + rows[i].rest
-                    );
+                    const delta = Number(newValue) - rows[rowIdx].duration;
+                    for (let i = rowIdx; i < n - 1; i++) {
+                        if(i === rowIdx) rows[i].duration += delta;
+                        rows[i + 1].arrive = minutesToTime(
+                            timeToMinutes(rows[i].depart) + rows[i].duration
+                        );
+                        rows[i + 1].depart = minutesToTime(
+                          timeToMinutes(rows[i + 1].arrive) + rows[i + 1].rest
+                        );
                     }
-                }
                 }
                 break;
             case "rest":
                 if (!isNaN(Number(newValue))) {
                 const delta = Number(newValue) - rows[rowIdx].rest;
                 for (let i = rowIdx; i < n - 1; i++) {
-                    if (i === rowIdx) rows[i].rest += delta;
-                    rows[i + 1].depart = minutesToTime(
-                    timeToMinutes(rows[i].arrive) + rows[i].rest
-                    );
-                    rows[i + 1].arrive = minutesToTime(
-                    timeToMinutes(rows[i + 1].depart) + rows[i + 1].duration
-                    );
-                }
+                        if (i === rowIdx) rows[i].rest += delta;
+                        rows[i].depart = minutesToTime(
+                            timeToMinutes(rows[i].arrive) + rows[i].rest
+                        );
+                        rows[i + 1].arrive = minutesToTime(
+                            timeToMinutes(rows[i].depart) + rows[i].duration
+                        );
+                    }
                 }
                 break;
             case "point":
@@ -337,10 +311,16 @@ const RoutePlanPage = () => {
         </button>
       </div>
       <div className="text-xs text-gray-500">
-        提示 1：左鍵點擊表格即可編輯，右鍵點擊即可刪除，每個日期左邊的圖示可以新增紀錄點。
+        提示
+        1：左鍵點擊表格即可編輯，右鍵點擊即可刪除，每個日期左邊的圖示可以新增紀錄點。
       </div>
       <div className="text-xs text-gray-500">
-        提示 2：修改「出發時間」、「抵達時間」、「行進時間」、「休息時間」都會自動計算整個行程的時間
+        提示
+        2：修改「出發時間」、「抵達時間」、「行進時間」、「休息時間」都會自動計算整個行程的時間
+      </div>
+      <div className="text-xs text-gray-500">
+        提示
+        3：每份行程要比較的紀錄點要相同名稱，不然無法成功比較
       </div>
 
       {/* 表格內容 */}
@@ -370,10 +350,10 @@ const RoutePlanPage = () => {
                 <thead className="bg-gray-100 text-gray-600">
                   <tr>
                     <th className="px-4 py-2 border">記錄點</th>
-                    <th className="px-4 py-2 border">出發時間</th>
                     <th className="px-4 py-2 border">抵達時間</th>
-                    <th className="px-4 py-2 border">行進時間(分鐘)</th>
                     <th className="px-4 py-2 border">休息時間(分鐘)</th>
+                    <th className="px-4 py-2 border">出發時間</th>
+                    <th className="px-4 py-2 border">行進時間(分鐘)</th>
                     <th className="px-4 py-2 border">備註</th>
                   </tr>
                 </thead>
@@ -391,10 +371,10 @@ const RoutePlanPage = () => {
                     >
                       {[
                         "point",
-                        "depart",
                         "arrive",
-                        "duration",
                         "rest",
+                        "depart",
+                        "duration",
                         "note",
                       ].map((field) => (
                         <td
@@ -453,7 +433,7 @@ const RoutePlanPage = () => {
             <h2 className="text-lg font-bold mb-4">修改時間</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium">出發時間</label>
+                <label className="block text-sm font-medium">開始時間</label>
                 <input
                   type="date"
                   value={tempDeparture}
@@ -462,7 +442,7 @@ const RoutePlanPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">抵達時間</label>
+                <label className="block text-sm font-medium">結束時間</label>
                 <input
                   type="date"
                   value={tempArrival}
