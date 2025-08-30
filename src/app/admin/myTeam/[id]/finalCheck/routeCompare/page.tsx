@@ -1,6 +1,8 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import { routeData } from "@/data/routeData"; // 你的資料檔案
+import { routeData } from "@/data/routeData";
+import { useRouter } from "next/navigation";
+import { usePlanTeamStore } from "@/state/planTeamStore";
 
 
 type RowData = {
@@ -70,6 +72,8 @@ const RouteComparePage = () => {
     const [data,] = useState<Route[]>(routeData);
     const [tabs, setTabs] = useState([""]);
     const [activeTab, setActiveTab] = useState(0);
+    const router = useRouter();
+    const teamId = usePlanTeamStore(state => state.id);
     
     const [editing, setEditing] = useState<{
         routeIdx: number;
@@ -116,24 +120,34 @@ const RouteComparePage = () => {
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
-      <div className="w-full flex gap-x-5 items-center mb-4">
-        <h1 className="text-2xl font-bold">行程比較表</h1>
-        <div className="flex gap-x-2">
-          {tabs.map((tab, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveTab(idx)}
-              className={`px-4 py-2 rounded-2xl text-sm font-medium transition
+      <div className="w-full flex gap-x-5 items-center justify-between mb-4">
+        <div className="flex gap-x-5 items-center">
+          <h1 className="text-2xl font-bold">行程比較表</h1>
+          <div className="flex gap-x-2">
+            {tabs.map((tab, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveTab(idx)}
+                className={`px-4 py-2 rounded-2xl text-sm font-medium transition
               ${
                 activeTab === idx
                   ? "bg-blue-500 text-white shadow"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
-            >
-              {tab}
-            </button>
-          ))}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
+        <button
+          className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
+          onClick={() =>
+            router.push(`/admin/myTeam/${teamId}/finalCheck?tab=4`)
+          }
+        >
+          返回計劃書
+        </button>
       </div>
       <div className="text-xs text-gray-500">
         提示 1：左鍵點擊表格即可編輯，連續點擊兩次即可取消編輯

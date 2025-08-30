@@ -1,6 +1,5 @@
 "use client";
 
-import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useItemListStore } from "@/state/ItemListStore";
 import { useState, useEffect } from "react";
 import {
@@ -14,6 +13,8 @@ import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { PiNotePencilFill } from "react-icons/pi";
 import InputComponent from "@/app/components/form/input";
+import { useRouter } from "next/navigation";
+import { usePlanTeamStore } from "@/state/planTeamStore";
 
 type Equipment = {
   id: string;
@@ -39,6 +40,8 @@ export default function AllocationPage() {
     const [splitItem, setSplitItem] = useState<Equipment | null>(null);
     const [memberId, setMemberId] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const router = useRouter();
+    const teamId = usePlanTeamStore(state => state.id);
     
     useEffect(() => {
       async function getEquipment() {
@@ -265,7 +268,17 @@ export default function AllocationPage() {
       >
         <div className="flex flex-col w-full min-h-screen p-6 gap-6 bg-gray-100">
           <div>
-            <h1 className="text-2xl font-bold mb-1">公裝分配系統</h1>
+            <div className="flex justify-between item-center">
+              <h1 className="text-2xl font-bold mb-1">公裝分配系統</h1>
+              <button
+                className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
+                onClick={() =>
+                  router.push(`/admin/myTeam/${teamId}/finalCheck?tab=2`)
+                }
+              >
+                返回計劃書
+              </button>
+            </div>
             <div className="text-xs text-gray-500">
               提示：從右側公裝表拖曳到隊員上，對公裝右鍵可以將重量拆解、合併相同名稱的裝備
             </div>

@@ -8,6 +8,7 @@ import TeamMember from "@/app/admin/TeamMember";
 import ItemList from "@/app/admin/ItemList";
 import { finalPlanType, TeamRole } from "@/types/enum";
 import RoutePlan from "@/app/admin/RoutePlan";
+import { useSearchParams } from "next/navigation";
 import {
   teamMemberFakeData as tmfake,
 } from "@/data/tableData";
@@ -20,12 +21,20 @@ const tabs = Object.values(finalPlanType).map((type) => {
 });
 
 const Page = () => {
+  const searchParams = useSearchParams();
   const { setTeam, team } = usePlanTeamStore();
   const { member } = useDraftTeamMemberStore();
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, x: 0 });
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const tabRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [teamMembers, setTeamMembers] = useState<RowData[]>([]);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) {
+      setSelectedTab(Number(tabParam));
+    }
+  }, [searchParams]);
   
 
   useEffect(() => {
