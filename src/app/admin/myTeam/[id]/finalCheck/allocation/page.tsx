@@ -31,6 +31,14 @@ type Member = {
   maxWeight: number;
 };
 
+const renderWeight = (item: Equipment) => {
+  if (item.quantity === "適量") {
+    return ` ${item.weight}g`;
+  } else {
+    return `*${item.quantity}/${item.weight}g`;
+  }
+};
+
 export default function AllocationPage() {
     const { team, setTeam } = usePlanTeamStore();
     const { teamItemList, getTeamItemList, setTeamItemList } = useItemListStore();
@@ -170,39 +178,51 @@ export default function AllocationPage() {
       setDragItem(null);
     }
 
-    const handleSplit = (item: Equipment, memberId: string | null, weight: number) => {
-       if (item.weight <= 1 || item.weight <= weight || weight <= 0) return;
-
-       const newItem1: Equipment = {
-         ...item,
-         id: item.id + "_1",
-         weight: weight,
-       };
-       const newItem2: Equipment = {
-         ...item,
-         id: item.id + "_2",
-         weight: item.weight - weight,
-       };
-
+    const handleSplit = (
+      item: Equipment,
+      memberId: string | null,
+      splitValues: string[]
+    ) => {
+      const splitByQuantity = !isNaN(Number(item.quantity));
+      const newValues = splitValues.filter(sp => !isNaN(Number(sp)));
+      if (newValues.length <= 1) return;
+      if (!splitByQuantity && newValues.reduce((sum, v) => Number(v) + sum, 0) !== item.weight) return;
+      if (splitByQuantity && newValues.reduce((sum, v) => Number(v) + sum, 0) !== Number(item.quantity)) return;
+      const newItems: Equipment[] = [];
+      
+      for (let idx = 0; idx < newValues.length; idx++) {
+        const numericValue = Number(newValues[idx]);
+        if (splitByQuantity) {
+          if (Number(item.quantity) < 1 || Number(item.quantity) <= numericValue || numericValue < 1) break;
+          newItems.push({
+            ...item,
+            id: item.id + "_" + (idx + 1),
+            weight: item.weight,
+            quantity: numericValue.toString()
+          });
+        } else {
+          if (item.weight < 0 || item.weight <= numericValue || numericValue < 0) break;
+          newItems.push({
+            ...item,
+            id: item.id + "_" + (idx + 1),
+            weight: numericValue,
+          });
+        }
+      }
       if (memberId) {
         setTeamItemList([
           ...teamItemList.filter((it) => it.itemId !== item.id),
-          {
-            itemId: newItem1.id,
-            ownerId: newItem1.ownerId,
-            quantity: newItem1.quantity,
-          },
-          {
-            itemId: newItem2.id,
-            ownerId: newItem2.ownerId,
-            quantity: newItem2.quantity,
-          },
+          ...newItems.map(newItem => ({
+            itemId: newItem.id,
+            ownerId: newItem.ownerId,
+            quantity: newItem.quantity,
+          }))
         ]);
       }
+
       setEquipment((prev) => [
         ...prev.filter((e) => e.id !== item.id),
-        newItem1,
-        newItem2,
+        ...newItems,
       ]);
     };
 
@@ -233,11 +253,21 @@ export default function AllocationPage() {
         if (!targetItem) return;
       }
 
-      const mergedItem: Equipment = {
-        ...sourceItem,
-        id: sourceItem.id + "_merged_" + targetItem.id,
-        weight: sourceItem.weight + targetItem.weight,
-      };
+      let mergedItem: Equipment;
+      if (isNaN(Number(sourceItem.quantity)) || isNaN(Number(targetItem.quantity))){
+        mergedItem = {
+          ...sourceItem,
+          id: sourceItem.id + "_merged_" + targetItem.id,
+          weight: sourceItem.weight + targetItem.weight,
+        };
+      } else {
+        mergedItem = {
+          ...sourceItem,
+          id: sourceItem.id + "_merged_" + targetItem.id,
+          weight: sourceItem.weight,
+          quantity: (Number(sourceItem.quantity) + Number(targetItem.quantity)).toString()
+        }
+      }
 
       setTeamItemList([
         ...teamItemList.filter((it) => ![sourceItem.id, targetItem.id].includes(it.itemId)),
@@ -269,7 +299,7 @@ export default function AllocationPage() {
         <div className="flex flex-col w-full min-h-screen p-6 gap-6 bg-gray-100">
           <div>
             <div className="flex justify-between item-center">
-              <h1 className="text-2xl font-bold mb-1">公裝分配系統</h1>
+              <h1 className="text-2xl font-bold mb-1">公裝分配</h1>
               <button
                 className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
                 onClick={() =>
@@ -348,8 +378,8 @@ export default function AllocationPage() {
               )
             }
             closeHandler={closeHandler}
-            confirmHandler={(w) => {
-              handleSplit(splitItem, memberId, w);
+            confirmHandler={(splitValue) => {
+              handleSplit(splitItem, memberId, splitValue);
               closeHandler();
             }}
           />
@@ -370,7 +400,11 @@ export default function AllocationPage() {
       edit: false,
     });
 
-    const totalWeight = member.items.reduce((sum, i) => sum + i.weight, 0);
+    const totalWeight = member.items.reduce((sum, item) => {
+      const weight = Number(item.weight || 0);
+      const quantity = isNaN(Number(item.quantity)) ? 1 : Number(item.quantity);
+      return sum + weight * quantity;
+    }, 0);
     const isOverWeight = totalWeight > member.maxWeight;
 
     return (
@@ -497,6 +531,8 @@ export default function AllocationPage() {
     const style = transform
       ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
       : undefined;
+    
+    
 
     return (
       <div
@@ -515,7 +551,7 @@ export default function AllocationPage() {
         }}
       >
         <span>
-          {item.name} ({item.weight}g)
+          {item.name}{renderWeight(item)}
         </span>
       </div>
     );
@@ -527,25 +563,173 @@ const SplitAndCombineDialog: React.FC<{
   mergeCandidates?: Equipment[];
   mergeHandler?: (targetId: string) => void;
   closeHandler: () => void;
-  confirmHandler: (w: number) => void;
+  confirmHandler: (splitValue: string[]) => void;
 }> = ({ splitItem, closeHandler, confirmHandler, mergeCandidates, mergeHandler }) => {
-  const [splitWeight, setSplitWeight] = useState<string>(
-    splitItem?.weight.toString() || ""
+  const [splitValue, setSplitValue] = useState<string[]>(["", ""]);
+  const [notSplitByQuantity, setNotSplitByQuantity] = useState<boolean>(false);
+  const [invalid, setInvalid] = useState<boolean>(false);
+
+  useEffect(() => {
+    const sum = splitValue.filter((v) => !isNaN(Number(v))).reduce((sum, v) => sum + Number(v), 0);
+    let result = false;
+    if (notSplitByQuantity) result = splitItem.weight !== sum;
+    else result = splitItem.weight * Number(splitItem.quantity) !== sum * splitItem.weight;
+    setInvalid(result);
+  }, [splitValue]);
+
+  useEffect(() => {
+    setNotSplitByQuantity(isNaN(Number(splitItem.quantity)));
+  }, [])
+
+  useEffect(() => {
+    if (notSplitByQuantity) setSplitValue([(splitItem.weight).toString(), ""]);
+    else setSplitValue([(Number(splitItem.quantity) - 1).toString(), "1"]);
+  }, [notSplitByQuantity])
+
+  const renderLastWeight = (value: number, idx: number) => {
+    let lastWeight: number, currentWeight: number;
+    const prefixSplitValue = splitValue
+      .slice(0, idx)
+      .filter((v) => !isNaN(Number(v)))
+      .reduce((sum, v) => sum + Number(v), 0);
+    
+    if (notSplitByQuantity) {
+      lastWeight = splitItem.weight - prefixSplitValue;
+      currentWeight = value;
+    }
+    else {
+      lastWeight = splitItem.weight * (Number(splitItem.quantity) - prefixSplitValue);
+      currentWeight = value * splitItem.weight;
+    }
+
+    if (currentWeight > lastWeight) {
+      const moreWeight = currentWeight - lastWeight;
+      return (
+        <div className="text-sm text-red-700">
+          超出重量 ({moreWeight > 0 ? moreWeight : 0} g)
+        </div>
+      );
+    }
+    if (notSplitByQuantity) return null;
+    return (
+      <div className="text-sm text-gray-700">重量：{currentWeight} g</div>
     );
+  }
+
+  const addNewSplitItem = () => {
+    const sum = splitValue
+      .filter((v) => !isNaN(Number(v)))
+      .reduce((sum, value) => sum + Number(value), 0);
+    if (notSplitByQuantity) {
+      const newValue =
+        sum < splitItem.weight
+          ? (splitItem.weight - sum).toString()
+          : "";
+      setSplitValue([...splitValue, newValue]);
+    }
+    else {
+      const newValue =
+        sum < Number(splitItem.quantity)
+          ? (Number(splitItem.quantity) - sum).toString()
+          : "";
+      setSplitValue([...splitValue, newValue]);
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 flex gap-x-3 items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow w-80">
+      <div className="bg-white p-6 rounded shadow w-1/3">
         <h2 className="text-lg font-semibold mb-4">{splitItem.name} 拆分</h2>
-          <input
-            type="number"
-            className="border p-2 w-full mb-4"
-            value={splitWeight}
-            placeholder={"輸入要拆多少重量 (g)"}
-            onChange={(e) => setSplitWeight(e.target.value)}
-            min={1}
-            max={splitItem?.weight ? splitItem.weight : undefined}
-          />
+
+        <div>
+          {notSplitByQuantity ? (
+            <div className="my-5 text-gray-700">
+              總重量: {splitItem.weight} g
+              <br />
+              總數量：{splitItem.quantity}
+            </div>
+          ) : (
+            <div className="my-5 text-gray-700">
+              總重量：{Number(splitItem.weight) * Number(splitItem.quantity)} g
+              / 單個重量：{Number(splitItem.weight)} g
+              <br />
+              總數量：{Number(splitItem.quantity)}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {splitValue.map((value, idx) => (
+              <div
+                className="flex items-center gap-4 p-2 border rounded px-5"
+                key={idx}
+              >
+                {!notSplitByQuantity ? (
+                  <>
+                    <label className="text-sm text-gray-600">{"數量："}</label>
+                    <input
+                      type="number"
+                      className="border p-2 w-24 rounded shadow-sm outline-none"
+                      value={value}
+                      placeholder={"輸入數量"}
+                      onChange={(e) => {
+                        const newValue = [...splitValue];
+                        newValue[idx] = e.currentTarget.value;
+                        setSplitValue(newValue);
+                      }}
+                      title={"不能小於 1 或大於總數量"}
+                      min={1}
+                      max={splitItem.quantity}
+                    />
+                    {renderLastWeight(
+                      isNaN(Number(value)) ? 0 : Number(value),
+                      idx
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <label className="text-sm text-gray-600">{"重量："}</label>
+                    <input
+                      type="number"
+                      className="border p-2 w-24 rounded shadow-sm outline-none"
+                      value={value}
+                      placeholder={"輸入重量(g)"}
+                      onChange={(e) => {
+                        const newValue = [...splitValue];
+                        newValue[idx] = e.currentTarget.value;
+                        setSplitValue(newValue);
+                      }}
+                      title={"不能小於 0 或大於總重量"}
+                      min={0}
+                      max={splitItem.weight}
+                    />
+                    {renderLastWeight(
+                      isNaN(Number(value)) ? 0 : Number(value),
+                      idx
+                    )}
+                  </>
+                )}
+                <button
+                  className="ml-auto text-red-500 hover:text-red-700 text-sm"
+                  onClick={() => {
+                    const newValue = splitValue.filter((_, i) => i !== idx);
+                    setSplitValue(newValue);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <div className="my-4 flex justify-start">
+              <button
+                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                onClick={() => addNewSplitItem()}
+              >
+                ＋ 新增拆分
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end gap-2">
           <button
             className="px-4 py-2 bg-gray-200 rounded"
@@ -554,13 +738,16 @@ const SplitAndCombineDialog: React.FC<{
             取消
           </button>
           <button
+            disabled={invalid}
             className="px-4 py-2 bg-blue-600 text-white rounded"
-            onClick={() => confirmHandler(Number(splitWeight) || 0)}
+            style={{ opacity: invalid ? "0.5" : "1" }}
+            onClick={() => confirmHandler(splitValue)}
           >
             拆分
           </button>
         </div>
       </div>
+
       {mergeCandidates && mergeCandidates.length > 0 && (
         <div className="bg-white p-6 rounded shadow w-80">
           <div className="mb-4">
@@ -572,7 +759,8 @@ const SplitAndCombineDialog: React.FC<{
                   className="px-2 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200"
                   onClick={() => mergeHandler && mergeHandler(item.id)}
                 >
-                  {item.name} ({item.weight} g) - 點擊合併
+                  {item.name}
+                  {renderWeight(item)} - 點擊合併
                 </button>
               ))}
             </div>
