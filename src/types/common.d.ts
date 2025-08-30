@@ -51,7 +51,8 @@ declare global {
 
   interface UserState {
     username: string;
-    setUsername: (name: string) => void;
+    userId: string;
+    setUser: (userId: string, username: string) => void;
   }
 
   interface ViewState {

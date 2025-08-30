@@ -1,7 +1,6 @@
 'use client';
 import { Timeline, TimelineItem, MoreTimeLineItem } from "@/app/components/timeline";
 import { usePlanTeamStore, usePlanTeamMetaStore } from "@/state/planTeamStore";
-import { useRouter } from "next/navigation";
 import { timelineData } from "@/data/timeLine";
 import { useEffect, useState } from "react";
 import { Event, TeamRole, TransportType } from "@/types/enum";
@@ -9,19 +8,22 @@ import { parseEnumKey, uuidToNumericId } from "@/lib/utility";
 import { PiNotePencilFill } from "react-icons/pi";
 import InputComponent from "@/app/components/form/input";
 import { FaPhoneAlt } from "react-icons/fa";
+import { FiLink } from "react-icons/fi";
+import { apiFetch } from "@/lib/middleware/clientAuth";
+import { useUserStore } from "@/state/store";
+import TrackLink from "@/app/components/TrackLink";
 
-interface FileItem {
-  id: string;
-  name: string;
+interface LinkItem {
+  pageName: string;
   url: string;
+  teamId: string;
 }
 
 export default function TeamOverview() {
-  const router = useRouter();
   const [editTeam, setEditTeam] = useState<boolean>(false);
   const { setTeam, team } = usePlanTeamStore();
   const teamId = usePlanTeamStore((state) => state.id);
-  const recentFiles: FileItem[] = [];
+  const [quickLinks, setQuickLinks] = useState<LinkItem[]>([]);
   const { getPlanTeamMetaById, teamMetas }  = usePlanTeamMetaStore();
   const today = new Date();
   const startDate = new Date(team.startDate);
@@ -37,6 +39,7 @@ export default function TeamOverview() {
         body: [{text: ""}],
       };
     }));
+  const { userId } = useUserStore();
 
   useEffect(() => {
     const eventState = getPlanTeamMetaById(teamId as number)?.eventState;
@@ -58,8 +61,16 @@ export default function TeamOverview() {
         };
       }))
     }
+
+    async function getLinks() {
+      const links: LinkItem[] = await apiFetch(
+        "/link/top-links?userId=" + userId
+      );
+      setQuickLinks(links.filter((link) => link.teamId === String(teamId)));
+    }
+    if(teamId) getLinks();
   }, [teamId, teamMetas]);
-  
+
   return (
     <div className="flex space-x-6 p-6 ml-12">
       {/* 左邊 Timeline - 固定寬度 */}
@@ -310,33 +321,31 @@ export default function TeamOverview() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mb-2">常用檔案</h2>
-          {recentFiles.length === 0 ? (
-            <p className="text-gray-500">尚無常用檔案</p>
+          <h2 className="text-lg font-semibold mb-4">常用連結</h2>
+          {quickLinks.length === 0 ? (
+            <p className="text-gray-500">尚無常用連結</p>
           ) : (
-            <ul>
-              {recentFiles.map((file) => (
-                <li
-                  key={file.id}
-                  className="flex items-center justify-between py-2 border-b border-gray-200"
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {quickLinks.map((link, idx) => (
+                <TrackLink
+                  key={idx}
+                  url={link.url}
+                  pageName={link.pageName}
+                  teamId={String(teamId)}
                 >
-                  <button
-                    className="text-left text-blue-600 hover:underline flex-1"
-                    onClick={() => router.push(file.url)}
+                  <a
+                    href={link.url}
+                    rel="noopener noreferrer"
+                    className="block cursor-pointer bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 flex justify-between items-center"
                   >
-                    {file.name}
-                  </button>
-                  <button
-                    className="ml-4 text-red-500 hover:text-red-700"
-                    // onClick={() => onDeleteFile(file.id)}
-                    aria-label={`刪除檔案 ${file.name}`}
-                    title="刪除檔案"
-                  >
-                    x
-                  </button>
-                </li>
+                    <p className="font-medium text-gray-800 truncate">
+                      {link.pageName}
+                    </p>
+                    <FiLink className="text-gray-500" />
+                  </a>
+                </TrackLink>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </div>

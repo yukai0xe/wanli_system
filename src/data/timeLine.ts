@@ -8,7 +8,7 @@ export const timelineData = [
     label: Event.firstMeetingState,
     labelClassName: "uk-label-success",
     moreAction: false,
-    link: "/firstMeeting",
+    link: "firstMeeting",
     buttonLabel: "查看",
   },
   {

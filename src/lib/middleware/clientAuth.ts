@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 export function useAuthGuard() {
   const router = useRouter();
-  const setUsername = useUserStore((state) => state.setUsername);
+  const setUser = useUserStore((state) => state.setUser);
   const setLoading = useViewState((state) => state.setLoading);
 
   useEffect(() => {
@@ -40,11 +40,12 @@ export function useAuthGuard() {
 
         if (!res.ok) throw new Error("No profile found");
 
-        const { username } = (await res.json()) ?? { username: null };
-        if (!username) throw new Error("Missing username");
+        const profile = (await res.json()) ?? { username: null, userId: null };
+        if (!profile.username) throw new Error("Missing username");
+        if (!profile.id) throw new Error("Missing id");
 
         if (isMounted) {
-          setUsername(username);
+          setUser(profile.id, profile.username);
           setLoading(false);
         }
       } catch (err) {
@@ -73,7 +74,7 @@ export function useAuthGuard() {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [router, setUsername, setLoading]);
+  }, [router, setUser, setLoading]);
 }
 
 export async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {

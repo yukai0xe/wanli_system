@@ -11,7 +11,6 @@ export async function GET(request: Request) {
                 id: user?.id
             }
         });
-        console.log(userProfile)
         return new Response(JSON.stringify(userProfile), {
             status: 200,
             headers: {

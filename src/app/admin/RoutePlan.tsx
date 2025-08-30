@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { routeData } from "@/data/routeData";
 import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useRouter } from "next/navigation";
+import TrackLink from "@/app/components/TrackLink";
 
 const RoutePlanPage = () => {
   const [tabs, setTabs] = useState(["預計行程"]);
@@ -303,14 +304,16 @@ const RoutePlanPage = () => {
             + 新增參考行程
           </button>
         </div>
-        <button
-          className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
-          onClick={() =>
-            router.push(`/admin/myTeam/${teamId}/finalCheck/routeCompare`)
-          }
-        >
-          行程比較
-        </button>
+        <TrackLink url={`/admin/myTeam/${teamId}/finalCheck/routeCompare`} pageName="行程比較表" teamId={String(teamId)}>
+          <button
+            className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
+            onClick={() =>
+              router.push(`/admin/myTeam/${teamId}/finalCheck/routeCompare`)
+            }
+          >
+            行程比較
+          </button>
+        </TrackLink>
       </div>
       <div className="text-xs text-gray-500">
         提示
@@ -321,8 +324,7 @@ const RoutePlanPage = () => {
         2：修改「出發時間」、「抵達時間」、「行進時間」、「休息時間」都會自動計算整個行程的時間
       </div>
       <div className="text-xs text-gray-500">
-        提示
-        3：每份行程要比較的紀錄點要相同名稱，不然無法成功比較
+        提示 3：每份行程要比較的紀錄點要相同名稱，不然無法成功比較
       </div>
 
       {/* 表格內容 */}
@@ -378,64 +380,67 @@ const RoutePlanPage = () => {
                         "depart",
                         "duration",
                         "note",
-                          ].map((field) => {
-                                const isStrike =
-                                  (rowIdx === 0 && (field === "arrive" || field === "rest")) ||
-                                  (rowIdx === rows.length - 1 && (field === "depart" || field === "rest" || field === "duration"));
-                                if (isStrike) {
-                                    return (
-                                      <td
-                                        key={date + "-" + field}
-                                        className="px-4 py-2 border cursor-pointer h-[35px] relative"
-                                      >
-                                        x
-                                      </td>
+                      ].map((field) => {
+                        const isStrike =
+                          (rowIdx === 0 &&
+                            (field === "arrive" || field === "rest")) ||
+                          (rowIdx === rows.length - 1 &&
+                            (field === "depart" ||
+                              field === "rest" ||
+                              field === "duration"));
+                        if (isStrike) {
+                          return (
+                            <td
+                              key={date + "-" + field}
+                              className="px-4 py-2 border cursor-pointer h-[35px] relative"
+                            >
+                              x
+                            </td>
+                          );
+                        }
+                        return (
+                          <td
+                            key={date + "-" + field}
+                            className="px-4 py-2 border cursor-pointer h-[35px]"
+                            onClick={() =>
+                              setEditing({ row: rowIdx, field, date })
+                            }
+                          >
+                            {editing?.row === rowIdx &&
+                            editing?.field === field &&
+                            editing?.date === date ? (
+                              <input
+                                type="text"
+                                autoFocus
+                                defaultValue={row[field as keyof typeof row]}
+                                onBlur={(e) => {
+                                  setEditing(null);
+                                  handleTimeChange(
+                                    date,
+                                    rowIdx,
+                                    field,
+                                    e.currentTarget.value
+                                  );
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    setEditing(null);
+                                    handleTimeChange(
+                                      date,
+                                      rowIdx,
+                                      field,
+                                      e.currentTarget.value
                                     );
-                                }
-                                return (
-                                  <td
-                                      key={date + "-" + field}
-                                      className="px-4 py-2 border cursor-pointer h-[35px]"
-                                      onClick={() =>
-                                          setEditing({ row: rowIdx, field, date })
-                                      }
-                                  >
-                                      {editing?.row === rowIdx &&
-                                          editing?.field === field &&
-                                          editing?.date === date ? (
-                                          <input
-                                              type="text"
-                                              autoFocus
-                                              defaultValue={row[field as keyof typeof row]}
-                                              onBlur={(e) => {
-                                                  setEditing(null);
-                                                  handleTimeChange(
-                                                      date,
-                                                      rowIdx,
-                                                      field,
-                                                      e.currentTarget.value
-                                                  );
-                                              }}
-                                              onKeyDown={(e) => {
-                                                  if (e.key === "Enter") {
-                                                      setEditing(null);
-                                                      handleTimeChange(
-                                                          date,
-                                                          rowIdx,
-                                                          field,
-                                                          e.currentTarget.value
-                                                      );
-                                                  }
-                                              }}
-                                              className="w-full h-full bg-transparent border-none outline-none px-0 py-0 text-sm"
-                                          />
-                                      ) : (
-                                          row[field as keyof typeof row]
-                                      )}
-                                  </td>
-                              )
-                          }
-                      )}
+                                  }
+                                }}
+                                className="w-full h-full bg-transparent border-none outline-none px-0 py-0 text-sm"
+                              />
+                            ) : (
+                              row[field as keyof typeof row]
+                            )}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>

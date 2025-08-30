@@ -13,6 +13,7 @@ import { useItemListStore } from "@/state/ItemListStore";
 import { ItemType } from "@/types/enum";
 import { apiFetch } from "@/lib/middleware/clientAuth";
 import { isTeamItem } from "@/lib/utility";
+import TrackLink from "@/app/components/TrackLink";
 
 
 const keyOrder = [...new Set([...pItemfake.keyOrder, ...tItemfake.keyOrder])];
@@ -283,14 +284,20 @@ const ItemListTable: React.FC<{
           </div>
           <div className="flex items-center gap-x-2">
             {isTeam && (
-              <button
-                className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
-                onClick={() =>
-                  router.push(`/admin/myTeam/${teamId}/finalCheck/allocation`)
-                }
+              <TrackLink
+                url={`/admin/myTeam/${teamId}/finalCheck/allocation`}
+                pageName="公裝分配表"
+                teamId={String(teamId)}
               >
-                公裝分配
-              </button>
+                <button
+                  className="px-4 py-2 rounded bg-amber-200 text-gray-800 hover:bg-amber-300"
+                  onClick={() =>
+                    router.push(`/admin/myTeam/${teamId}/finalCheck/allocation`)
+                  }
+                >
+                  公裝分配表
+                </button>
+              </TrackLink>
             )}
           </div>
         </div>

@@ -20,6 +20,8 @@ import { FaFileInvoice } from "react-icons/fa";
 import { MdListAlt } from "react-icons/md";
 import { FaGear } from "react-icons/fa6";
 import { useAuthGuard } from "@/lib/middleware/clientAuth";
+import TrackLink from "@/app/components/TrackLink";
+import { TrackLinkContext } from "@/app/components/TrackLink";
 
 export const prefixUrl = "/admin";
 
@@ -31,7 +33,7 @@ const EntryPage = ({
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
   const {loading, setLoading } = useViewState();
-  const username = useUserStore(state => state.username);
+  const { username, userId } = useUserStore();
 
   useEffect(() => {
     if (prevPathname.current !== pathname) {
@@ -49,8 +51,16 @@ const EntryPage = ({
     return () => clearInterval(interval);
   }, []);
 
+  async function trackLinkClick(url: string, pageName: string, teamId: string) {
+    await fetch("/api/link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, url, pageName, teamId }),
+    });
+  }
+
   return (
-    <>
+    <TrackLinkContext.Provider value={{ trackLinkClick }}>
       {loading ? (
         <div className="w-full h-dvh flex justify-center items-center gap-x-5">
           <Image
@@ -64,7 +74,7 @@ const EntryPage = ({
       ) : (
         <DashboardLayout>{children}</DashboardLayout>
       )}
-    </>
+    </TrackLinkContext.Provider>
   );
 };
 
@@ -285,22 +295,38 @@ const DashboardLayout = ({
         >
           <ul className="w-full flex flex-col gap-1">
             {teamLeftBarModel.map((item) => {
+              const isActive = lastPathname === item.path.split("/").pop();
+              const linkClass = `flex items-center justify-center h-[60px] text-2xl text-white rounded-md transition 
+                                  hover:bg-rose-900 hover:scale-[0.90] ${
+                                    isActive ? "scale-[0.95] bg-rose-950" : ""
+                                  }`;
+
+              const linkContent = (
+                <Link href={item.path} className={linkClass}>
+                  {item.displayText}
+                </Link>
+              );
+
               return (
                 <li key={item.id}>
-                  <Link
-                    href={item.path}
-                    className={`flex items-center justify-center h-[60px] text-2xl text-white rounded-md transition hover:bg-rose-900 hover:scale-[0.90]
-                      ${lastPathname === item.path.split('/').pop() ? "scale-[0.95] bg-rose-950" : ""}`}
-                  >
-                    {item.displayText}
-                  </Link>
+                  {item.id === 1 ? (
+                    linkContent
+                  ) : (
+                    <TrackLink
+                      url={item.path}
+                      pageName={item.displayText}
+                      teamId={String(teamId)}
+                    >
+                      {linkContent}
+                    </TrackLink>
+                  )}
                 </li>
               );
             })}
 
             <li className="flex justify-end mt-2">
               <HiArrowLeft
-                  onClick={() => setIsFold((prev) => !prev)}
+                onClick={() => setIsFold((prev) => !prev)}
                 className="size-10 text-white font-bold mt-2 ml-auto cursor-pointer rounded-full p-2 transition hover:-translate-x-1"
               />
             </li>

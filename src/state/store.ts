@@ -9,7 +9,8 @@ const useTeamStore = create((set) => ({
 
 const useUserStore = create<UserState>((set) => ({
   username: "",
-  setUsername: (name) => set({ username: name }),
+  userId: "",
+  setUser: (id, name) => set({ userId: id, username: name }),
 }));
 
 const useViewState = create<ViewState>((set) => ({

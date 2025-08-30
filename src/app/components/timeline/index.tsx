@@ -7,6 +7,8 @@ import DialogComponent from "@/app/components/dialog";
 import { useState } from "react";
 import { IoIosBonfire } from "react-icons/io";
 import { MdEventNote } from "react-icons/md";
+import TrackLink from "@/app/components/TrackLink";
+import { usePlanTeamStore } from "@/state/planTeamStore";
 
 export interface TimelineItem {
   id: number;
@@ -44,6 +46,7 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
       showLabel: !item.moreAction,
     }))
   );
+  const teamId = usePlanTeamStore(state => state.id);
 
   const [settingState, setSettingState] = useState<{label: boolean, content: boolean}>({
     label: true,
@@ -172,7 +175,9 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
                     animate={false}
                     style={{ color: "var(--white-2)", padding: "5px", gap: 0 }}
                     handleClick={() => setAddNewEvent(true)}
-                  >新增時間</Button1>
+                  >
+                    新增時間
+                  </Button1>
                 </div>
                 {addNewEvent && (
                   <DialogComponent
@@ -233,14 +238,20 @@ export const Timeline: React.FC<TimelineProps> = ({ items }) => {
                   <span className={styles.timeTag}>
                     <time dateTime={item.date}>{item.date || item.title}</time>
                   </span>
-                  {item.moreAction && (
-                    <button
-                      disabled={!item.moreAction}
-                      onClick={() => routerTo(item.link)}
-                      className={styles.button}
+                  {item.moreAction && item.link && (
+                    <TrackLink
+                      url={`/admin/myTeam/${teamId}/${item.link}`}
+                      pageName={item.label}
+                      teamId={String(teamId)}
                     >
-                      {item.buttonLabel}
-                    </button>
+                      <button
+                        disabled={!item.moreAction}
+                        onClick={() => routerTo(item.link)}
+                        className={styles.button}
+                      >
+                        {item.buttonLabel}
+                      </button>
+                    </TrackLink>
                   )}
                 </div>
                 {item.moreAction && (
