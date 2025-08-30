@@ -12,6 +12,7 @@ import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useItemListStore } from "@/state/ItemListStore";
 import { ItemType } from "@/types/enum";
 import { apiFetch } from "@/lib/middleware/clientAuth";
+import { isTeamItem } from "@/lib/utility";
 
 
 const keyOrder = [...new Set([...pItemfake.keyOrder, ...tItemfake.keyOrder])];
@@ -64,12 +65,16 @@ const ItemListTable: React.FC<{
 
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
       const gdata: groupData = {};
-      const rowData = isTeam ? await getTeamItemList() : await getPersonalItemList();
+      const rowData = isTeam
+        ? await getTeamItemList()
+        : await getPersonalItemList();
       const sortedData = sortDataRule(rowData as RowData[]);
       sortedData.forEach((data) => {
-        if ("type" in data && (typeof data.type === "string" || typeof data.type === "number")) {
+        if (
+          "type" in data &&
+          (typeof data.type === "string" || typeof data.type === "number")
+        ) {
           if (!(data.type in gdata)) {
             gdata[data.type] = { data: [], isOpen: true };
           }
@@ -79,7 +84,38 @@ const ItemListTable: React.FC<{
       setGroupData(gdata);
       setLoading(false);
     }
-    fetchData();
+    if (loading) fetchData();
+    else {
+      const rowData = isTeam ? teamItemList : personalItemList;
+      const gdata: groupData = {};
+      Object.entries(groupData).map(([group, items]) => {
+        gdata[group] = {
+          data: items.data.map(item => {
+            const newItem = rowData.find(r => r.itemId === item.id);
+            if (!newItem) return item;
+            if (isTeamItem(newItem)) {
+              return {
+                ...item,
+                id: newItem.itemId,
+                quantity: newItem.quantity,
+                ownerId: newItem.ownerId
+              };
+            }
+            else {
+              return {
+                ...item,
+                id: newItem.itemId,
+                required: newItem.required,
+                quantity: newItem.quantity
+              };
+            }
+          }), isOpen: true };
+      });
+      for (const group of Object.keys(gdata)) {
+        gdata[group].data = sortDataRule(gdata[group].data);
+      }
+      setGroupData(gdata);
+    }
   }, [personalItemList, teamItemList, isTeam]);
 
   const openHandler = (type: string) => {
@@ -121,6 +157,7 @@ const ItemListTable: React.FC<{
       ]);
     }
     closeHandler();
+    setLoading(true);
   }
 
   const addNewItem = (newItem: Item) => {
@@ -139,24 +176,30 @@ const ItemListTable: React.FC<{
       ]);
     }
     closeHandler();
+    setLoading(true);
   }
 
   const editHandler = (newData: RowData[]) => {
     if (isTeam) {
-      setTeamItemList(newData.map(d => ({
-        itemId: d.id,
-        quantity: d.quantity as string,
-        weight: d.weight,
-        ownerId: d.ownerId as string
-      })))
+      const map = new Map(teamItemList.map((item) => [item.itemId, item]));
+      newData.forEach((d) => {
+        const old: teamItem | null = map.get(d.id) || null;
+        if (old) map.set(d.id, {...old, quantity: String(d.quantity) });
+      });
+      setTeamItemList(Array.from(map.values()));
     } else {
-      setPersonalItemList(
-        newData.map((d) => ({
-          itemId: d.id,
-          required: Boolean(d.required),
-          quantity: d.quantity as string,
-        }))
-      );
+      const map = new Map(personalItemList.map((item) => [item.itemId, item]));
+      newData.forEach((d) => {
+        const old: personalItem | null = map.get(d.id) || null;
+        if (old) map.set(d.id, {
+          ...old,
+          required: typeof d.required === "string" ? d.required === "true" :
+                    typeof d.required === "boolean" ? d.required :
+                    typeof d.required === "number" ? Boolean(d.required) : true,
+          quantity: String(d.quantity)
+        });
+      })
+      setPersonalItemList(Array.from(map.values()));
     }
   }
 

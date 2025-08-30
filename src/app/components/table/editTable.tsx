@@ -129,11 +129,13 @@ const EditableTable: React.FC<{
     }
     };
     
-    const renderValue = (key: string, value?: number | string | boolean) => {
+  const renderValue = (key: string, value?: number | string | boolean) => {
         switch (key) {
           case "gender":
             return Gender[value as keyof typeof Gender];
           case "required":
+            if (typeof value === "string") return value === "true" ? "必配" : "選配";
+            if (typeof value === "number") return Boolean(value) ? "必配" : "選配";
             return value ? "必配" : "選配";
           default:
             return value;

@@ -1,11 +1,11 @@
 declare global {
-    interface personalItem {
+    type personalItem = {
         itemId: string,
         required: boolean,
         quantity: string
     }
 
-    interface teamItem {
+    type teamItem = {
         itemId: string,
         quantity: string,
         ownerId: string,

@@ -1,5 +1,4 @@
 "use client";
-// import { useState, useEffect } from "react";
 import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useDraftTeamMemberStore } from "@/state/teamMemberStore";
 import styles from "@/assets/styles/finalCheck.module.css"

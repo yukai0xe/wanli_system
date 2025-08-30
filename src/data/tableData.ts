@@ -271,7 +271,6 @@ export const teamItemListFakeData: { rowsHeader: EditableRowHeader[], rowsData: 
           {
             label: "總重量",
           fn: (data: { weight: string; quantity: string; }[]) => {
-              console.log(data);
               return data.reduce((sum, row) => {
                 const weight = Number(row.weight || 0);
                 const quantity = isNaN(Number(row.quantity)) ? 1 : Number(row.quantity);

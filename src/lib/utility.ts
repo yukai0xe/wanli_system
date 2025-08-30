@@ -68,3 +68,13 @@ export function minutesToTime(m: number): string {
     .toString()
     .padStart(2, "0")}`;
 }
+
+export function isTeamItem(obj: unknown): obj is teamItem {
+  return (
+    typeof obj === "object" &&
+    obj !== null &&
+    "itemId" in obj &&
+    "quantity" in obj &&
+    "ownerId" in obj
+  );
+}
