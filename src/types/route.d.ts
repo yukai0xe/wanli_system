@@ -9,7 +9,10 @@ declare global {
         note: string;
     }
 
-    type Route = Record<string, RecordPoint[]>
+    type Route = {
+        id: string;
+        days: Record<string, RecordPoint[]>
+    };
 }
 
 export {}

@@ -1,13 +1,12 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import { routeData } from "@/data/routeData";
 import { useRouter } from "next/navigation";
 import { usePlanTeamStore } from "@/state/planTeamStore";
-
+import { useRouteStore } from "@/state/routeStore";
 
 type RowData = {
   point: string;
-  routes: (RecordPoint | null)[];
+    routes: (RecordPoint & { date: string; routeId: string; } | null)[];
 };
 
 type dayTableData = {
@@ -69,44 +68,68 @@ function EditableCell({
 }
 
 const RouteComparePage = () => {
-    const [data,] = useState<Route[]>(routeData);
+    const { handleTimeChange } = useRouteStore();
+    const data = useRouteStore(state => state.routes);
     const [tabs, setTabs] = useState([""]);
     const [activeTab, setActiveTab] = useState(0);
     const router = useRouter();
     const teamId = usePlanTeamStore(state => state.id);
     
     const [editing, setEditing] = useState<{
-        routeIdx: number;
+        isDuration: boolean;
+        date: string;
+        routeId: string;
         pointId: string;
     } | null>(null);
 
-    const [editDuration, setEditDuration] = useState<{
-      routeIdx: number;
-      pointId: string;
-    } | null>(null);
-
   // 取得所有紀錄點
-  const allPoints = Array.from(
-    new Set(
-      data.flatMap((route) =>
-        Object.values(route).flatMap((day) => day.map((r) => r.point))
-      )
-    )
-  );
+    const allPoints = Array.from(
+        new Set(
+        data.flatMap((route) =>
+            Object.values(route.days).flatMap((day) => day.map((r) => r.point))
+        ))
+    );
+    
+    const saveRoutes = (arrive?: string, rest?: number, duration?: number) => {
+        if (arrive && editing) handleTimeChange({
+            field: "arrive",
+            date: editing?.date,
+            routeId: editing?.routeId,
+            pointId: editing?.pointId,
+        }, arrive);
+
+        if (rest && editing) handleTimeChange({
+            field: "rest",
+            date: editing?.date,
+            routeId: editing?.routeId,
+            pointId: editing?.pointId,
+        }, rest);
+
+        if (duration && editing) handleTimeChange({
+            field: "duration",
+            date: editing?.date,
+            routeId: editing?.routeId,
+            pointId: editing?.pointId,
+        }, duration);
+    };
 
   // 建立比較表資料
   const pointsTableData: RowData[] = allPoints.map((point) => ({
     point,
     routes: data.map((route) => {
-      for (const dayRecords of Object.values(route)) {
-        const match = dayRecords.find((r) => r.point === point);
-        if (match) return match;
-      }
-      return null;
+        for (const [date, dayRecords] of Object.entries(route.days)) {
+            const match = dayRecords.find((r) => r.point === point);
+            if (match) return {
+                date,
+                routeId: route.id,
+                ...match
+            }
+        }
+        return null;
     }),
   }));
     
-    const dayTablesData: dayTableData[] = Object.values(data[0]).map((day, idx) => {
+    const dayTablesData: dayTableData[] = Object.values(data[0].days).map((day, idx) => {
         const points = day.map(d => d.point);
         return {
             day: "Day" + (idx + 1),
@@ -184,26 +207,40 @@ const RouteComparePage = () => {
                       className="px-4 py-2 border cursor-pointer w-[250px]"
                       onClick={() =>
                         setEditing(
-                          route ? { routeIdx, pointId: route.id } : null
+                          route
+                            ? {
+                                isDuration: false,
+                                date: route.date,
+                                routeId: route.routeId,
+                                pointId: route.id,
+                              }
+                            : null
                         )
                       }
                       style={{ width: "max-content" }}
                     >
                       {route ? (
-                        editing?.routeIdx === routeIdx &&
+                        !editing?.isDuration &&
+                        editing?.routeId === route.routeId &&
                         editing?.pointId === route.id ? (
                           <EditableCell
                             arrive={route.arrive}
                             rest={route.rest}
-                            onChange={() => {}}
+                            onChange={(arrive, rest) =>
+                              saveRoutes(arrive, rest)
+                            }
                             onBlur={() => setEditing(null)}
                             onDoubleClick={() => setEditing(null)}
                           />
                         ) : (
                           <div className="space-y-1">
-                            <div>
-                              抵達：{route.arrive}{" "}
-                              {route.rest > 0 && `(休息 ${route.rest} 分鐘)`}
+                            <div
+                              title={`抵達時間 ${route.arrive}${
+                                route.rest > 0 ? ` 休息 ${route.rest}'` : ""
+                              }`}
+                            >
+                              {route.arrive}{" "}
+                              {route.rest > 0 && `(休息 ${route.rest}')`}
                             </div>
                           </div>
                         )
@@ -222,28 +259,45 @@ const RouteComparePage = () => {
                         key={routeIdx}
                         className="px-4 py-2 border"
                         onClick={() =>
-                          setEditDuration(
-                            route ? { routeIdx, pointId: route.id } : null
+                          setEditing(
+                            route
+                              ? {
+                                  isDuration: true,
+                                  date: route.date,
+                                  routeId: route.routeId,
+                                  pointId: route.id,
+                                }
+                              : null
                           )
                         }
                       >
                         {route ? (
-                          editDuration?.routeIdx === routeIdx &&
-                          editDuration?.pointId === route.id ? (
+                          editing?.isDuration &&
+                          editing?.routeId === route.routeId &&
+                          editing?.pointId === route.id ? (
                             <label className="flex items-center text-sm">
                               <input
                                 type="text"
                                 autoFocus
                                 value={route.duration}
-                                onChange={() => {}}
-                                onBlur={() => setEditDuration(null)}
-                                onDoubleClick={() => setEditDuration(null)}
+                                onChange={(e) =>
+                                  saveRoutes(
+                                    undefined,
+                                    undefined,
+                                    Number(e.target.value)
+                                  )
+                                }
+                                onBlur={() => setEditing(null)}
+                                onDoubleClick={() => setEditing(null)}
                                 className="bg-transparent w-full p-0 m-0 text-sm border-none outline-none"
                               />
                             </label>
                           ) : (
                             <div className="space-y-1">
-                              <div>{route.duration} 分鐘</div>
+                              <div>
+                                {route.duration}
+                                {"'"}
+                              </div>
                             </div>
                           )
                         ) : (
