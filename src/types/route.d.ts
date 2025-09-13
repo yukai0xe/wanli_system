@@ -11,6 +11,9 @@ declare global {
 
     type Route = {
         id: string;
+        source: string;
+        teamSize: number;
+        weather: string;
         days: Record<string, RecordPoint[]>
     };
 }

@@ -25,6 +25,9 @@ export const emptyDateRoute: RecordPoint[] = [
 export const initialRouteData: Route[] = [
   {
     id: uuidv7(),
+    source: "",
+    teamSize: 1,
+    weather: "晴",
     days: {
       [dayjs().format("YYYY-MM-DD")]: [
         {
@@ -66,13 +69,16 @@ export const initialRouteData: Route[] = [
           note: "",
         },
       ],
-    }
+    },
   },
   {
     id: uuidv7(),
+    source: "",
+    teamSize: 1,
+    weather: "晴",
     days: {
       [dayjs().format("YYYY-MM-DD")]: emptyDateRoute,
       [dayjs().add(1, "day").format("YYYY-MM-DD")]: emptyDateRoute,
-    }
+    },
   },
 ];

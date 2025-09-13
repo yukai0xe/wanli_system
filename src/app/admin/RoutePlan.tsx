@@ -43,9 +43,11 @@ const RouteTable: React.FC<{
 
     const handleAddRow = (date: string) => {
         const newData = data.map((route) => {
-            const { id, days } = route;
-            const newRoute: Route = {id, days: {}};
-            for (const date in days) {
+          const newRoute: Route = {
+            ...route,
+            days: {}
+          }
+            for (const date in route.days) {
                 newRoute.days[date] = route.days[date].map((r) => ({ ...r }));
             }
             return newRoute;
@@ -86,9 +88,8 @@ const RouteTable: React.FC<{
 
   const handleDeleteRow = (date: string, rowIdx: number) => {
     const newData = data.map((route) => {
-      const { id, days } = route;
-      const newRoute: Route = { id, days: {} };
-      for (const date in days) {
+      const newRoute: Route = { ...route, days: {} };
+      for (const date in route.days) {
         newRoute.days[date] = route.days[date].map((r) => ({ ...r }));
       }
       return newRoute;
@@ -111,30 +112,7 @@ const RouteTable: React.FC<{
     setData(newData);
   };
 
-  const handleInputValidation = (field: string, value: string) => {
-    if (field === "depart" || field === "arrive") {
-      // 檢查時間格式 HH:mm
-      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
-      if (!timeRegex.test(value)) {
-        alert("時間格式錯誤，請輸入 HH:mm，例如 08:00");
-        return false;
-      }
-    }
-
-    if (field === "duration" || field === "rest") {
-      // 檢查整數
-      const intVal = Number(value);
-      if (!Number.isInteger(intVal) || intVal < 0) {
-        alert("請輸入正整數");
-        return false;
-      }
-    }
-
-    return true;
-  };
-
   const handleTimeChange = (cell: EditCell, newValue: string | number) => {
-      if (!handleInputValidation(cell.field, newValue.toString())) return;
       _handleTimeChange(cell, newValue);
   };
 
@@ -224,7 +202,7 @@ const RouteTable: React.FC<{
 
   return (
     <div className="space-y-8 mt-4">
-      {Object.entries(data[activeTab].days || {}).map(([date, rows]) => (
+      {Object.entries(data[activeTab]?.days || {}).map(([date, rows]) => (
         <div key={date} className="space-y-2">
           <div className="flex gap-x-3 items-center">
             <LuMapPinPlus
@@ -346,6 +324,14 @@ const RouteTable: React.FC<{
                               setFocus({rowIdx, field, date });
                             }
                           }}
+                          onBlur={() => {
+                            if (
+                              editing !== null &&
+                              prevValue.toString().length > 0
+                            ) {
+                              handleTimeChange(editing, prevValue);
+                            }
+                          }}
                         >
                           {checkEditing(row.id, field, date) ? (
                             <input
@@ -378,19 +364,33 @@ const RouteTable: React.FC<{
 const DateDialog: React.FC<{
     currentArrive?: string
     currentDepart?: string
-    confirmHandler: (arrive: string, depart: string) => void;
+    currentTeamSize?: string
+    currentWeather?: string
+    currentSource?: string
+    confirmHandler: (arrive: string, depart: string, teamSize: string, weather: string, source: string) => void;
     cancelHandler: () => void;
-}> = ({ currentArrive, currentDepart, confirmHandler, cancelHandler }) => {
-    const [tempDeparture, setTempDeparture] = useState(currentDepart || "");
-    const [tempArrival, setTempArrival] = useState(currentArrive || "");
+}> = ({
+  currentArrive,
+  currentDepart,
+  currentTeamSize,
+  currentWeather,
+  currentSource,
+  confirmHandler,
+  cancelHandler
+}) => {
+  const [tempDeparture, setTempDeparture] = useState(currentDepart || "");
+  const [tempArrival, setTempArrival] = useState(currentArrive || "");
+  const [teamSize, setTeamSize] = useState(currentTeamSize || "1");
+  const [weather, setWeather] = useState(currentWeather || "晴");
+  const [source, setSource] = useState(currentSource || "");
     
     return (
       <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
         <div className="bg-white rounded-lg p-6 w-80 shadow-lg">
-          <h2 className="text-lg font-bold mb-4">修改時間</h2>
+          <h2 className="text-lg font-bold mb-4">修改隊伍資訊/修改日期</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium">開始時間</label>
+              <label className="block text-sm font-medium">開始日期</label>
               <input
                 type="date"
                 value={tempDeparture}
@@ -399,7 +399,7 @@ const DateDialog: React.FC<{
               />
             </div>
             <div>
-              <label className="block text-sm font-medium">結束時間</label>
+              <label className="block text-sm font-medium">結束日期</label>
               <input
                 type="date"
                 value={tempArrival}
@@ -407,6 +407,38 @@ const DateDialog: React.FC<{
                 className="w-full border rounded px-2 py-1"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium">隊伍人數</label>
+              <input
+                type="text"
+                value={teamSize}
+                onChange={(e) => setTeamSize(e.target.value)}
+                className="w-full border rounded px-2 py-1"
+              />
+            </div>
+            {
+              <>
+                <div>
+                  <label className="block text-sm font-medium">天氣</label>
+                  <input
+                    type="text"
+                    value={weather}
+                    onChange={(e) => setWeather(e.target.value)}
+                    className="w-full border rounded px-2 py-1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">資料來源</label>
+                  <input
+                    type="text"
+                    value={source}
+                    placeholder="https://"
+                    onChange={(e) => setSource(e.target.value)}
+                    className="w-full border rounded px-2 py-1"
+                  />
+                </div>
+              </>
+            }
           </div>
           <div className="flex justify-end space-x-2 mt-6">
             <button
@@ -416,7 +448,7 @@ const DateDialog: React.FC<{
               取消
             </button>
             <button
-              onClick={() => confirmHandler(tempArrival, tempDeparture)}
+              onClick={() => confirmHandler(tempArrival, tempDeparture, teamSize, weather, source)}
               className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               儲存
@@ -435,46 +467,87 @@ const RoutePlanPage = () => {
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showBtn, setShowBtn] = useState(false);
+  
 
-    const saveTime = (tempArrival: string, tempDeparture: string) => {
-      const newData = routes.map((route) => {
-        const { id, days } = route;
-        const newRoute: Route = { id, days: {} };
-        for (const date in days) {
+    const saveHandler = (arrive: string, depart: string, teamSize: string, weather: string, source: string) => {
+      const newRoutes = routes.map((route) => {
+        const newRoute: Route = { ...route, days: {} };
+        for (const date in route.days) {
           newRoute.days[date] = route.days[date].map((r) => ({ ...r }));
         }
         return newRoute;
       });
+      saveTime(newRoutes, { tempArrival: arrive, tempDeparture: depart });
+      saveInfo(newRoutes, { teamSize, weather, source });
+      setRoutes(newRoutes);
+      closeModal();
+    }
+  const saveTime = (
+    newRoutes: Route[],
+    {
+      tempArrival,
+      tempDeparture
+    }: {
+      tempArrival: string;
+      tempDeparture: string;
+    }
+  ) => {
+    const diffTime =
+      new Date(tempArrival).getTime() - new Date(tempDeparture).getTime();
+    if (diffTime < 0) return;
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    let currentDate = tempDeparture;
 
-      const diffTime =
-        new Date(tempArrival).getTime() - new Date(tempDeparture).getTime();
-      if (diffTime < 0) return;
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      let currentDate = tempDeparture;
-
-      if (activeTab === routes.length) {
-        newData.push({id: uuidv7(), days: {}});
-        for (let i = 0; i < diffDays; i++) {
-          newData[activeTab].days[currentDate] = emptyDateRoute;
-          const dateObj = new Date(currentDate);
-          dateObj.setDate(dateObj.getDate() + 1);
-          currentDate = dateObj.toISOString().split("T")[0];
-        }
-      } else {
-        newData[activeTab] = { id: uuidv7(), days: {} };
-        const oldDates = Object.keys(routes[activeTab]);
-        for (let i = 0; i < diffDays; i++) {
-            if (oldDates.includes(currentDate))
-                newData[activeTab].days[currentDate] = routes[activeTab].days[currentDate];
-            else newData[activeTab].days[currentDate] = emptyDateRoute;
-            const dateObj = new Date(currentDate);
-            dateObj.setDate(dateObj.getDate() + 1);
-            currentDate = dateObj.toISOString().split("T")[0];
-        }
+    if (activeTab === routes.length) {
+      newRoutes.push({
+        id: uuidv7(),
+        source: "",
+        teamSize: 1,
+        weather: "",
+        days: {},
+      });
+      for (let i = 0; i < diffDays; i++) {
+        newRoutes[activeTab].days[currentDate] = emptyDateRoute;
+        const dateObj = new Date(currentDate);
+        dateObj.setDate(dateObj.getDate() + 1);
+        currentDate = dateObj.toISOString().split("T")[0];
       }
-      setRoutes(newData);
-      setIsModalOpen(false);
-    };
+    } else {
+      newRoutes[activeTab] = {
+        id: uuidv7(),
+        source: "",
+        teamSize: 1,
+        weather: "",
+        days: {},
+      };
+      const oldDates = Object.keys(routes[activeTab]);
+      for (let i = 0; i < diffDays; i++) {
+        if (oldDates.includes(currentDate))
+          newRoutes[activeTab].days[currentDate] =
+            routes[activeTab].days[currentDate];
+        else newRoutes[activeTab].days[currentDate] = emptyDateRoute;
+        const dateObj = new Date(currentDate);
+        dateObj.setDate(dateObj.getDate() + 1);
+        currentDate = dateObj.toISOString().split("T")[0];
+      }
+    }
+  };
+  
+  const saveInfo = (newRoutes: Route[], {teamSize, weather, source }: {
+    teamSize: string,
+    weather: string,
+    source: string
+  }) => {
+    if (activeTab < routes.length) {
+      newRoutes[activeTab].teamSize = Number(teamSize);
+      newRoutes[activeTab].weather = weather;
+      newRoutes[activeTab].source = source;
+    }
+    setRoutes(newRoutes);
+  }
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
     const cancelHandler = () => {
         if(activeTab === routes.length) setActiveTab(0);
@@ -482,13 +555,11 @@ const RoutePlanPage = () => {
     }
     
     const handleAddRoute = () => {
-        setActiveTab(tabs.length);
-        openModal();
+      setActiveTab(tabs.length);
+      openModal();
     }
 
-    const openModal = () => {
-        setIsModalOpen(true);
-    };
+    
 
     const renderDialog = () => {
         if (activeTab >= routes.length) {
@@ -496,17 +567,24 @@ const RoutePlanPage = () => {
             <DateDialog
               currentDepart={dayjs().format("YYYY-MM-DD")}
               currentArrive={dayjs().format("YYYY-MM-DD")}
-              confirmHandler={(arrive, depart) => saveTime(arrive, depart)}
+              currentTeamSize={"1"}
+              currentWeather={""}
+              currentSource={""}
+              confirmHandler={(arrive, depart, teamSize, weather, source) => saveHandler(arrive, depart, teamSize, weather, source)}
               cancelHandler={() => cancelHandler()}
             />
           );
         } else {
-          const dates = Object.keys(routes[activeTab]);
+          const dates = Object.keys(routes[activeTab].days);
+          const { teamSize, weather, source } = routes[activeTab];
           return (
             <DateDialog
               currentDepart={dates[0]}
               currentArrive={dates[dates.length - 1]}
-              confirmHandler={(arrive, depart) => saveTime(arrive, depart)}
+              currentTeamSize={teamSize.toString()}
+              currentWeather={activeTab !== 0 ? weather : undefined}
+              currentSource={activeTab !== 0 ? source : undefined}
+              confirmHandler={(arrive, depart, teamSize, weather, source) => saveHandler(arrive, depart, teamSize, weather, source)}
               cancelHandler={() => cancelHandler()}
             />
           );
@@ -542,6 +620,8 @@ const RoutePlanPage = () => {
         } catch (err) {
             if (err instanceof Error) alert("讀取或解析 JSON 失敗：" + err.message);
             else alert("讀取或解析 JSON 失敗：未知錯誤");
+        } finally {
+          setShowBtn(false);
         }
       };
       reader.readAsText(file);
@@ -554,12 +634,13 @@ const RoutePlanPage = () => {
         if (activeTab >= newData.length) setActiveTab(newData.length - 1);
     }
 
-    useEffect(() => {
+  useEffect(() => {
+      console.log(routes.length)
         if (routes.length > 0) {
             const newTabs = ["預計行程"];
             for (let i = 1; i < routes.length; i++)
               newTabs.push("參考行程" + numberToChinese(i));
-            setTabs(newTabs);
+          setTabs(newTabs);
         }
     }, [routes]);
 
@@ -572,7 +653,7 @@ const RoutePlanPage = () => {
               onClick={() => openModal()}
               className="px-6 py-2 rounded-2xl bg-yellow-400 text-stone-700 hover:bg-yellow-500 text-sm"
             >
-              修改日期
+              修改隊伍資訊/修改日期
             </button>
             {tabs.map((tab, idx) => (
               <button
@@ -656,6 +737,18 @@ const RoutePlanPage = () => {
             </div>
           </div>
         </div>
+        {activeTab < routes.length && (
+          <ul className="mb-2 flex flex-col gap-y-1">
+            <li>隊伍人數：{routes[activeTab].teamSize}</li>
+            {activeTab !== 0 && (
+              <>
+                <li>天氣：{routes[activeTab].weather}</li>
+                <li>資料來源：{routes[activeTab].source}</li>
+              </>
+            )}
+          </ul>
+        )}
+
         <div className="text-xs text-gray-500">
           提示
           1：左鍵點擊表格即可編輯，右鍵點擊即可刪除，每個日期左邊的圖示可以新增紀錄點。
