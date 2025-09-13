@@ -4,142 +4,185 @@ import { useRouter } from "next/navigation";
 import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useRouteStore } from "@/state/routeStore";
 
-type RowData = {
-  point: string;
-    routes: (RecordPoint & { date: string; routeId: string; } | null)[];
-};
-
 type dayTableData = {
-    day: string;
-    dayPoints: RowData[]
+  day: string;
+  dayPoints: {
+    point: string,
+    routes: (RecordPoint & { date: string; routeId: string; } | null)[]
+  }[];
 }
 
 interface EditableCellProps {
-    arrive: string;
+    arrive: string | null;
+    depart: string | null;
     rest: number;
-    onChange: (arrive: string, rest: number) => void;
+    onChange: (arrivDepart: string, rest: number) => void;
     onBlur: () => void;
     onDoubleClick: () => void;
 }
 
 function EditableCell({
   arrive,
+  depart,
   rest,
   onChange,
   onBlur,
   onDoubleClick
 }: EditableCellProps) {
-  const [arriveVal, setArriveVal] = useState(arrive);
+  const [arriveVal, setArriveVal] = useState<string | null>(arrive);
+  const [departVal, setDepartVal] = useState<string | null>(depart);
   const [restVal, setRestVal] = useState(rest.toString());
 
   return (
     <div
-        className="flex flex-col gap-y-1"
-        tabIndex={-1}
-        onDoubleClick={() => onDoubleClick()}
-        onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-            onChange(arriveVal, Number(restVal));
-            onBlur();
-            }
-        }}
+      className="flex flex-col gap-y-1"
+      tabIndex={-1}
+      onDoubleClick={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          if (arriveVal !== null) onChange(arriveVal, Number(restVal));
+          if (departVal !== null) onChange(departVal, Number(restVal));
+          onDoubleClick();
+        }
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          if (arriveVal !== null) onChange(arriveVal, Number(restVal));
+          if (departVal !== null) onChange(departVal, Number(restVal));
+          onBlur();
+        }
+      }}
     >
-      <label className="flex items-center text-sm">
-        抵達：
-        <input
-          type="text"
-          value={arriveVal}
-          onChange={(e) => setArriveVal(e.target.value)}
-          className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
-        />
-      </label>
-
-      <label className="flex items-center text-sm">
-        休息(分鐘)：
-        <input
-          type="text"
-          value={restVal}
-          onChange={(e) => setRestVal(e.target.value)}
-          className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
-        />
-      </label>
+      {arriveVal != null && (
+        <label className="flex items-center text-sm">
+          抵達：
+          <input
+            type="text"
+            value={arriveVal}
+            onChange={(e) => setArriveVal(e.target.value)}
+            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+          />
+        </label>
+      )}
+      {departVal != null && (
+        <label className="flex items-center text-sm">
+          出發：
+          <input
+            type="text"
+            value={departVal}
+            onChange={(e) => setDepartVal(e.target.value)}
+            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+          />
+        </label>
+      )}
+      {arriveVal != null && (
+        <label className="flex items-center text-sm">
+          休息(分鐘)：
+          <input
+            type="text"
+            value={restVal}
+            onChange={(e) => setRestVal(e.target.value)}
+            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+          />
+        </label>
+      )}
     </div>
   );
 }
 
 const RouteComparePage = () => {
-    const { handleTimeChange } = useRouteStore();
-    const data = useRouteStore(state => state.routes);
-    const [tabs, setTabs] = useState([""]);
-    const [activeTab, setActiveTab] = useState(0);
-    const router = useRouter();
-    const teamId = usePlanTeamStore(state => state.id);
-    
-    const [editing, setEditing] = useState<{
-        isDuration: boolean;
-        date: string;
-        routeId: string;
-        pointId: string;
-    } | null>(null);
+  const { handleTimeChange } = useRouteStore();
+  const data = useRouteStore((state) => state.routes);
+  const [tabs, setTabs] = useState([""]);
+  const [activeTab, setActiveTab] = useState(0);
+  const router = useRouter();
+  const teamId = usePlanTeamStore((state) => state.id);
+  const [duration, setDuration] = useState<string>();
 
-  // 取得所有紀錄點
-    const allPoints = Array.from(
-        new Set(
-        data.flatMap((route) =>
-            Object.values(route.days).flatMap((day) => day.map((r) => r.point))
-        ))
-    );
-    
-    const saveRoutes = (arrive?: string, rest?: number, duration?: number) => {
-        if (arrive && editing) handleTimeChange({
-            field: "arrive",
-            date: editing?.date,
-            routeId: editing?.routeId,
-            pointId: editing?.pointId,
-        }, arrive);
-
-        if (rest && editing) handleTimeChange({
-            field: "rest",
-            date: editing?.date,
-            routeId: editing?.routeId,
-            pointId: editing?.pointId,
-        }, rest);
-
-        if (duration && editing) handleTimeChange({
-            field: "duration",
-            date: editing?.date,
-            routeId: editing?.routeId,
-            pointId: editing?.pointId,
-        }, duration);
-    };
+  const [editing, setEditing] = useState<{
+    isDuration: boolean;
+    date: string;
+    routeId: string;
+    pointId: string;
+  } | null>(null);
 
   // 建立比較表資料
-  const pointsTableData: RowData[] = allPoints.map((point) => ({
-    point,
-    routes: data.map((route) => {
-        for (const [date, dayRecords] of Object.entries(route.days)) {
-            const match = dayRecords.find((r) => r.point === point);
-            if (match) return {
-                date,
+  const routeIdxs = Array.from({ length: data.length }, () => 0);
+  const dayTablesData: dayTableData[] = Object.values(data[0].days).flatMap(
+    (day, idx) => ({
+      day: "Day" + (idx + 1),
+      dayPoints: day.map((target) => ({
+        point: target.point,
+        routes: data.map((route, idx) => {
+          const currentRecord = Object.entries(route.days).flatMap(
+            ([date, items]) => items.map((item) => ({ date, ...item }))
+          );
+          while (routeIdxs[idx] < currentRecord.length) {
+            if (currentRecord[routeIdxs[idx]].point === target.point) {
+              return {
                 routeId: route.id,
-                ...match
+                ...currentRecord[routeIdxs[idx]++],
+              };
             }
-        }
-        return null;
-    }),
-  }));
-    
-    const dayTablesData: dayTableData[] = Object.values(data[0].days).map((day, idx) => {
-        const points = day.map(d => d.point);
-        return {
-            day: "Day" + (idx + 1),
-            dayPoints: pointsTableData.filter(row => points.includes(row.point))
-        }
-    });
+            routeIdxs[idx]++;
+          }
+          return null;
+        }),
+      })),
+    })
+  );
 
-    useEffect(() => {
-        setTabs(dayTablesData.map((_, idx) => "Day" + (idx + 1)));
-    }, []);
+  const saveRoutes = (
+    route: Partial<Exclude<RecordPoint, "id" | "point" | "note">>
+  ) => {
+    if (route.arrive !== undefined && editing)
+      handleTimeChange(
+        {
+          field: "arrive",
+          date: editing?.date,
+          routeId: editing?.routeId,
+          pointId: editing?.pointId,
+        },
+        route.arrive
+      );
+
+    if (route.depart !== undefined && editing)
+      handleTimeChange(
+        {
+          field: "depart",
+          date: editing?.date,
+          routeId: editing?.routeId,
+          pointId: editing?.pointId,
+        },
+        route.depart
+      );
+
+    if (route.rest !== undefined && editing)
+      handleTimeChange(
+        {
+          field: "rest",
+          date: editing?.date,
+          routeId: editing?.routeId,
+          pointId: editing?.pointId,
+        },
+        route.rest
+      );
+
+    if (route.duration !== undefined && editing)
+      handleTimeChange(
+        {
+          field: "duration",
+          date: editing?.date,
+          routeId: editing?.routeId,
+          pointId: editing?.pointId,
+        },
+        route.duration
+      );
+    setEditing(null);
+  };
+
+  useEffect(() => {
+    setTabs(dayTablesData.map((_, idx) => "Day" + (idx + 1)));
+  }, []);
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
@@ -224,23 +267,38 @@ const RouteComparePage = () => {
                         editing?.routeId === route.routeId &&
                         editing?.pointId === route.id ? (
                           <EditableCell
-                            arrive={route.arrive}
+                            arrive={rowIdx !== 0 ? route.arrive : null}
+                            depart={rowIdx === 0 ? route.depart : null}
                             rest={route.rest}
-                            onChange={(arrive, rest) =>
-                              saveRoutes(arrive, rest)
-                            }
+                            onChange={(val, rest) => {
+                              if (rowIdx === 0)
+                                saveRoutes({
+                                  depart: val,
+                                });
+                              else
+                                saveRoutes({
+                                  arrive: val,
+                                  rest: rest,
+                                });
+                            }}
                             onBlur={() => setEditing(null)}
                             onDoubleClick={() => setEditing(null)}
                           />
                         ) : (
                           <div className="space-y-1">
                             <div
-                              title={`抵達時間 ${route.arrive}${
-                                route.rest > 0 ? ` 休息 ${route.rest}'` : ""
+                              title={`抵達時間 ${
+                                rowIdx === 0 ? route.depart : route.arrive
+                              }${
+                                rowIdx !== 0 && route.rest > 0
+                                  ? ` 休 ${route.rest}'`
+                                  : ""
                               }`}
                             >
-                              {route.arrive}{" "}
-                              {route.rest > 0 && `(休息 ${route.rest}')`}
+                              {rowIdx === 0 ? route.depart : route.arrive}{" "}
+                              {rowIdx !== 0 &&
+                                route.rest > 0 &&
+                                `(休 ${route.rest}')`}
                             </div>
                           </div>
                         )
@@ -258,7 +316,7 @@ const RouteComparePage = () => {
                       <td
                         key={routeIdx}
                         className="px-4 py-2 border"
-                        onClick={() =>
+                        onClick={() => {
                           setEditing(
                             route
                               ? {
@@ -268,8 +326,9 @@ const RouteComparePage = () => {
                                   pointId: route.id,
                                 }
                               : null
-                          )
-                        }
+                          );
+                          setDuration(route?.duration.toString());
+                        }}
                       >
                         {route ? (
                           editing?.isDuration &&
@@ -279,16 +338,17 @@ const RouteComparePage = () => {
                               <input
                                 type="text"
                                 autoFocus
-                                value={route.duration}
-                                onChange={(e) =>
-                                  saveRoutes(
-                                    undefined,
-                                    undefined,
-                                    Number(e.target.value)
-                                  )
-                                }
-                                onBlur={() => setEditing(null)}
-                                onDoubleClick={() => setEditing(null)}
+                                value={duration || ""}
+                                onChange={(e) => {
+                                  if (isNaN(Number(e.currentTarget.value))) return;
+                                  setDuration(e.currentTarget.value)
+                                }}
+                                onBlur={() => {
+                                  saveRoutes({ duration: Number(duration) });
+                                }}
+                                onDoubleClick={() => {
+                                  saveRoutes({ duration: Number(duration) });
+                                }}
                                 className="bg-transparent w-full p-0 m-0 text-sm border-none outline-none"
                               />
                             </label>
