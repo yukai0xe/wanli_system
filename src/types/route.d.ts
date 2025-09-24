@@ -7,6 +7,7 @@ declare global {
         duration: number;
         rest: number;
         note: string;
+        compareDetail: string;
     }
 
     type Route = {

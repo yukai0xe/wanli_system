@@ -10,6 +10,7 @@ export const emptyDateRoute: RecordPoint[] = [
     rest: 0,
     duration: 0,
     note: "",
+    compareDetail: "",
   },
   {
     id: uuidv7(),
@@ -19,6 +20,7 @@ export const emptyDateRoute: RecordPoint[] = [
     rest: 0,
     duration: 0,
     note: "",
+    compareDetail: "",
   },
 ];
 
@@ -38,6 +40,7 @@ export const initialRouteData: Route[] = [
           rest: 0,
           duration: 180,
           note: "出發集合",
+          compareDetail: "",
         },
         {
           id: uuidv7(),
@@ -47,6 +50,7 @@ export const initialRouteData: Route[] = [
           rest: 0,
           duration: 0,
           note: "",
+          compareDetail: "",
         },
       ],
       [dayjs().add(1, "day").format("YYYY-MM-DD")]: [
@@ -58,6 +62,7 @@ export const initialRouteData: Route[] = [
           rest: 0,
           duration: 180,
           note: "出發集合",
+          compareDetail: "",
         },
         {
           id: uuidv7(),
@@ -67,6 +72,7 @@ export const initialRouteData: Route[] = [
           rest: 0,
           duration: 0,
           note: "",
+          compareDetail: "",
         },
       ],
     },

@@ -34,6 +34,7 @@ const sortDataRule = (route: Route) => {
         depart: row.depart,
         duration: row.duration,
         note: row.note,
+        compareDetail: row.compareDetail
       };
     });
   }
@@ -50,7 +51,7 @@ export const useRouteStore = create<RouteStore>((set, get) => ({
             // 檢查時間格式 HH:mm
             const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
             if (!timeRegex.test(value)) {
-                alert("時間格式錯誤，請輸入 HH:mm，例如 08:00、13:59");
+                // alert("時間格式錯誤，請輸入 HH:mm，例如 08:00、13:59");
                 return false;
             }
             }
@@ -59,7 +60,7 @@ export const useRouteStore = create<RouteStore>((set, get) => ({
             // 檢查整數
             const intVal = Number(value);
             if (!Number.isInteger(intVal) || intVal < 0) {
-                alert("請輸入正整數");
+                // alert("請輸入正整數");
                 return false;
             }
             }
@@ -76,65 +77,93 @@ export const useRouteStore = create<RouteStore>((set, get) => ({
                 if (d !== date) {
                     newDays[d] = route.days[d].map((r) => ({ ...r })); // 複製其他日期
                 } else {
-                    const rows = route.days[d];
+                    const rows = route.days[d].map((r) => ({ ...r }));
                     const n = rows.length;
                     const selectedRowIdx = rows.findIndex((r) => r.id === pointId);
                     if (selectedRowIdx === -1) {
                         newDays[d] = rows.map((r) => ({ ...r }));
                         continue;
                     }
-
                     const newRows = rows.map((r,) => ({ ...r })); // 複製整個 row 陣列
                     const selectedRow = newRows[selectedRowIdx];
                     switch (field) {
                         case "depart":
                             if (typeof newValue === "string") {
-                                const diff = timeToMinutes(newValue) - timeToMinutes(selectedRow.depart);
-                                newRows.forEach((r) => {
-                                    r.depart = r.depart.length > 0 ? minutesToTime(timeToMinutes(r.depart) + diff) : newValue;
-                                    r.arrive = r.arrive.length > 0 ? minutesToTime(timeToMinutes(r.arrive) + diff) : newValue;
-                                });
+                            const diff =
+                                timeToMinutes(newValue) -
+                                timeToMinutes(selectedRow.depart);
+                            newRows.forEach((r) => {
+                                r.depart =
+                                r.depart.length > 0
+                                    ? minutesToTime(timeToMinutes(r.depart) + diff)
+                                    : newValue;
+                                r.arrive =
+                                r.arrive.length > 0
+                                    ? minutesToTime(timeToMinutes(r.arrive) + diff)
+                                    : newValue;
+                            });
                             }
                             break;
                         case "arrive":
                             if (typeof newValue === "string") {
-                                const diff = timeToMinutes(newValue) - timeToMinutes(selectedRow.arrive);
-                                newRows.forEach((r) => {
-                                    r.depart = r.depart.length > 0 ? minutesToTime(timeToMinutes(r.depart) + diff) : newValue;
-                                    r.arrive = r.arrive.length > 0 ? minutesToTime(timeToMinutes(r.arrive) + diff) : newValue;
-                                });
+                            const diff =
+                                timeToMinutes(newValue) -
+                                timeToMinutes(selectedRow.arrive);
+                            newRows.forEach((r) => {
+                                r.depart =
+                                r.depart.length > 0
+                                    ? minutesToTime(timeToMinutes(r.depart) + diff)
+                                    : newValue;
+                                r.arrive =
+                                r.arrive.length > 0
+                                    ? minutesToTime(timeToMinutes(r.arrive) + diff)
+                                    : newValue;
+                            });
                             }
                             break;
                         case "duration":
                             if (!isNaN(Number(newValue))) {
-                                const delta = Number(newValue) - selectedRow.duration;
-                                for (let i = selectedRowIdx; i < n - 1; i++) {
-                                if (i === selectedRowIdx) newRows[i].duration += delta;
+                            const delta = Number(newValue) - selectedRow.duration;
+                            for (let i = selectedRowIdx; i < n - 1; i++) {
+                                if (i === selectedRowIdx)
+                                newRows[i].duration += delta;
                                 newRows[i + 1].arrive =
-                                    newRows[i].depart.length > 0
-                                    ? minutesToTime(timeToMinutes(newRows[i].depart) + newRows[i].duration)
+                                newRows[i].depart.length > 0
+                                    ? minutesToTime(
+                                        timeToMinutes(newRows[i].depart) +
+                                        newRows[i].duration
+                                    )
                                     : "";
                                 newRows[i + 1].depart =
-                                    newRows[i].arrive.length > 0
-                                    ? minutesToTime(timeToMinutes(newRows[i + 1].arrive) + newRows[i + 1].rest)
+                                newRows[i].arrive.length > 0
+                                    ? minutesToTime(
+                                        timeToMinutes(newRows[i + 1].arrive) +
+                                        newRows[i + 1].rest
+                                    )
                                     : "";
-                                }
+                            }
                             }
                             break;
                         case "rest":
                             if (!isNaN(Number(newValue))) {
-                                const delta = Number(newValue) - selectedRow.rest;
-                                for (let i = selectedRowIdx; i < n - 1; i++) {
+                            const delta = Number(newValue) - selectedRow.rest;
+                            for (let i = selectedRowIdx; i < n - 1; i++) {
                                 if (i === selectedRowIdx) newRows[i].rest += delta;
                                 newRows[i].depart =
-                                    newRows[i].arrive.length > 0
-                                    ? minutesToTime(timeToMinutes(newRows[i].arrive) + newRows[i].rest)
+                                newRows[i].arrive.length > 0
+                                    ? minutesToTime(
+                                        timeToMinutes(newRows[i].arrive) +
+                                        newRows[i].rest
+                                    )
                                     : "";
                                 newRows[i + 1].arrive =
-                                    newRows[i].depart.length > 0
-                                    ? minutesToTime(timeToMinutes(newRows[i].depart) + newRows[i].duration)
+                                newRows[i].depart.length > 0
+                                    ? minutesToTime(
+                                        timeToMinutes(newRows[i].depart) +
+                                        newRows[i].duration
+                                    )
                                     : "";
-                                }
+                            }
                             }
                             break;
                         case "point":
@@ -143,14 +172,15 @@ export const useRouteStore = create<RouteStore>((set, get) => ({
                         case "note":
                             selectedRow.note = newValue.toString();
                             break;
+                        case "compareDetail":
+                            selectedRow.compareDetail = newValue.toString();
+                            break;
                     }
-
                     newDays[d] = newRows;
                 }
             }
-
             return { ...route, days: newDays };
-            });
+        });
 
             set({ routes: newRoutes });
         },

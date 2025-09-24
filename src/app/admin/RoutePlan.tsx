@@ -25,7 +25,7 @@ type EditCell = {
 };
 
 type FocusCell = {
-    field: Exclude<keyof RecordPoint, "id">;
+  field: Exclude<keyof RecordPoint, "id" | "compareDetail">;
     date: string;
     rowIdx: number;
 };
@@ -61,23 +61,25 @@ const RouteTable: React.FC<{
                 ? minutesToTime(timeToMinutes(lastRow.arrive) + lastRow.rest)
                 : "";
             rows.push({
-            id: uuidv7(),
-            point: "",
-            depart: time,
-            arrive: time,
-            duration: 0,
-            rest: 0,
-            note: "",
+              id: uuidv7(),
+              point: "",
+              depart: time,
+              arrive: time,
+              duration: 0,
+              rest: 0,
+              note: "",
+              compareDetail: "",
             });
         } else {
             rows.push({
-            id: uuidv7(),
-            point: "",
-            depart: "12:00",
-            arrive: "12:00",
-            duration: 0,
-            rest: 0,
-            note: "",
+              id: uuidv7(),
+              point: "",
+              depart: "12:00",
+              arrive: "12:00",
+              duration: 0,
+              rest: 0,
+              note: "",
+              compareDetail: "",
             });
         }
 
