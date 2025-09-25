@@ -1,9 +1,10 @@
 'use client';
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef  } from "react";
 import { useRouter } from "next/navigation";
 import { usePlanTeamStore } from "@/state/planTeamStore";
 import { useRouteStore } from "@/state/routeStore";
 import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 type dayPoint = {
   point: string;
@@ -30,7 +31,7 @@ interface EditableCellProps {
       | { field: "rest"; value: number }
       | { field: "compareDetail"; value: string }
   ) => void;
-  onBlur: () => void;
+  onBlur: (e: MouseEvent) => void;
 }
 
 interface EditableCell {
@@ -40,7 +41,7 @@ interface EditableCell {
   pointId: string;
 }
 
-function EditableCell({
+const EditableCell = ({
   arrive,
   depart,
   rest,
@@ -49,7 +50,7 @@ function EditableCell({
   style,
   onChange,
   onBlur,
-}: EditableCellProps) {
+}: EditableCellProps) => {
   const [arriveVal, setArriveVal] = useState<string | null>(arrive ?? null);
   const [departVal, setDepartVal] = useState<string | null>(depart ?? null);
   const [restVal, setRestVal] = useState<string | null>(rest?.toString() ?? null);
@@ -60,7 +61,7 @@ function EditableCell({
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-        onBlur();
+        onBlur(e);
       }
     }
     document.addEventListener("click", handleClickOutside);
@@ -68,100 +69,113 @@ function EditableCell({
   }, [arriveVal, departVal, restVal, onChange, onBlur]);
 
   return (
-    <div
-      style={style}
-      className="flex flex-col gap-y-1 fixed bg-white p-2 border border-gray-300 shadow-lg z-10 mt-2"
-      tabIndex={-1}
-      ref={popupRef}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {arriveVal != null && (
-        <label className="flex items-center text-sm">
-          預計抵達時間：
-          <input
-            type="text"
-            value={arriveVal}
-            onChange={(e) => {
-              setArriveVal(e.target.value);
-              onChange({
-                field: "arrive",
-                value: e.target.value,
-              });
-            }}
-            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
-          />
-        </label>
-      )}
-      {departVal != null && (
-        <label className="flex items-center text-sm">
-          預計出發時間：
-          <input
-            type="text"
-            value={departVal}
-            onChange={(e) => {
-              setDepartVal(e.target.value);
-              onChange({
-                field: "depart",
-                value: e.target.value,
-              });
-            }}
-            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
-          />
-        </label>
-      )}
-      {durationVal != null && (
-        <label className="flex items-center text-sm">
-          預計行進時間：
-          <input
-            type="text"
-            value={durationVal}
-            onChange={(e) => {
-              setDurationVal(e.target.value);
-              onChange({
-                field: "duration",
-                value: Number(e.target.value),
-              });
-            }}
-            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
-          />
-        </label>
-      )}
-      {restVal != null && (
-        <label className="flex items-center text-sm">
-          預計休息時間(分鐘)：
-          <input
-            type="text"
-            value={restVal}
-            onChange={(e) => {
-              setRestVal(e.target.value);
-              if (arriveVal)
+    
+      <motion.div
+        key="editable-cell"
+        initial={{
+          opacity: 0,
+          scale: 0.9,
+          y: -8,
+        }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: -8 }}
+        transition={{
+          duration: 0.2,
+          ease: "easeOut",
+        }}
+        style={style}
+        className="flex flex-col gap-y-1 fixed bg-white p-2 border border-gray-300 shadow-lg z-10 mt-2"
+        tabIndex={-1}
+        ref={popupRef}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {arriveVal != null && (
+          <label className="flex items-center text-sm">
+            預計抵達時間：
+            <input
+              type="text"
+              value={arriveVal}
+              onChange={(e) => {
+                setArriveVal(e.target.value);
                 onChange({
-                  field: "rest",
+                  field: "arrive",
+                  value: e.target.value,
+                });
+              }}
+              className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+            />
+          </label>
+        )}
+        {departVal != null && (
+          <label className="flex items-center text-sm">
+            預計出發時間：
+            <input
+              type="text"
+              value={departVal}
+              onChange={(e) => {
+                setDepartVal(e.target.value);
+                onChange({
+                  field: "depart",
+                  value: e.target.value,
+                });
+              }}
+              className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+            />
+          </label>
+        )}
+        {durationVal != null && (
+          <label className="flex items-center text-sm">
+            預計行進時間：
+            <input
+              type="text"
+              value={durationVal}
+              onChange={(e) => {
+                setDurationVal(e.target.value);
+                onChange({
+                  field: "duration",
                   value: Number(e.target.value),
                 });
-            }}
-            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
-          />
-        </label>
-      )}
-      {compareDetailVal != null && (
-        <label className="flex items-center text-sm">
-          備註：
-          <input
-            type="text"
-            value={compareDetailVal}
-            onChange={(e) => {
-            setCompareDetailVal(e.target.value);
-              onChange({
-                field: "compareDetail",
-                value: e.target.value,
-              });
-            }}
-            className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
-          />
-        </label>
-      )}
-    </div>
+              }}
+              className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+            />
+          </label>
+        )}
+        {restVal != null && (
+          <label className="flex items-center text-sm">
+            預計休息時間(分鐘)：
+            <input
+              type="text"
+              value={restVal}
+              onChange={(e) => {
+                setRestVal(e.target.value);
+                if (arriveVal)
+                  onChange({
+                    field: "rest",
+                    value: Number(e.target.value),
+                  });
+              }}
+              className="bg-transparent w-36 py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+            />
+          </label>
+        )}
+        {compareDetailVal != null && (
+          <label className="flex flex-col gap-y-2 text-sm">
+            備註：
+            <input
+              type="text"
+              value={compareDetailVal}
+              onChange={(e) => {
+                setCompareDetailVal(e.target.value);
+                onChange({
+                  field: "compareDetail",
+                  value: e.target.value,
+                });
+              }}
+              className="bg-transparent block w-full py-1 px-2 m-0 text-sm border border-solid shadow-sm outline-none"
+            />
+          </label>
+        )}
+    </motion.div>
   );
 }
 
@@ -184,11 +198,16 @@ const RouteComparePage = () => {
   }
 
   const editHandler = (rect: DOMRect, editCell: EditableCell | null) => {
-    if (editCell === null || isEditing(editCell.routeId, editCell.pointId)) setEditing(null);
+    if (editCell === null) setEditing(null);
     else {
       setPos({ x: rect.left, y: rect.bottom, w: rect.width });
       setEditing(editCell);
     }
+  };
+
+  const closeHandler = (e: MouseEvent) => {
+    const td = (e.target as HTMLElement).closest("td[data-type='content']");
+    if (!td) setEditing(null);
   };
 
   const saveRoutes = (
@@ -312,6 +331,7 @@ const RouteComparePage = () => {
                       </td>
                       {row.routes.map((route, routeIdx) => (
                         <td
+                          data-type="content"
                           key={route?.id ?? routeIdx}
                           className="px-4 py-2 border cursor-pointer w-[250px] relative"
                           onClick={(e) => {
@@ -350,32 +370,44 @@ const RouteComparePage = () => {
                                   {route.compareDetail}
                                 </div>
                               </div>
-                              {!editing?.isDuration &&
-                                isEditing(route?.routeId, route?.id) &&
-                                createPortal(
-                                  <EditableCell
-                                    arrive={
-                                      rowIdx !== 0 ? route.arrive : undefined
-                                    }
-                                    depart={
-                                      rowIdx === 0 ? route.depart : undefined
-                                    }
-                                    rest={
-                                      rowIdx !== dayTablesData[activeTab].dayPoints.length - 1 && rowIdx !== 0
-                                        ? route.rest
-                                        : undefined
-                                    }
-                                    compareDetail={route.compareDetail}
-                                    style={{
-                                      top: pos.y,
-                                      left: pos.x,
-                                      width: pos.w,
-                                    }}
-                                    onChange={(res) => saveRoutes({ [res.field]: res.value })}
-                                    onBlur={() => setEditing(null)}
-                                  />,
-                                  document.body
-                                )}
+                              {createPortal(
+                                <AnimatePresence>
+                                  {!editing?.isDuration &&
+                                    isEditing(route?.routeId, route?.id) && (
+                                      <EditableCell
+                                        arrive={
+                                          rowIdx !== 0
+                                            ? route.arrive
+                                            : undefined
+                                        }
+                                        depart={
+                                          rowIdx === 0
+                                            ? route.depart
+                                            : undefined
+                                        }
+                                        rest={
+                                          rowIdx !==
+                                            dayTablesData[activeTab].dayPoints
+                                              .length -
+                                              1 && rowIdx !== 0
+                                            ? route.rest
+                                            : undefined
+                                        }
+                                        style={{
+                                          top: pos.y,
+                                          left: pos.x,
+                                          width: pos.w,
+                                        }}
+                                        compareDetail={route.compareDetail}
+                                        onChange={(res) =>
+                                          saveRoutes({ [res.field]: res.value })
+                                        }
+                                        onBlur={(e) => closeHandler(e)}
+                                      />
+                                    )}
+                                </AnimatePresence>,
+                                document.body
+                              )}
                             </>
                           ) : (
                             <span className="text-gray-400">—</span>
@@ -390,6 +422,7 @@ const RouteComparePage = () => {
                         <td className="px-4 py-2 border text-xs"></td>
                         {row.routes.map((route, routeIdx) => (
                           <td
+                            data-type="content"
                             key={routeIdx}
                             className="px-4 py-2 border cursor-pointer"
                             onClick={(e) => {
@@ -416,21 +449,28 @@ const RouteComparePage = () => {
                                     {"'"}
                                   </div>
                                 </div>
-                                {editing?.isDuration &&
-                                  isEditing(route?.routeId, route?.id) &&
-                                  createPortal(
-                                    <EditableCell
-                                      duration={route.duration}
-                                      style={{
-                                        top: pos.y,
-                                        left: pos.x,
-                                        width: pos.w,
-                                      }}
-                                      onChange={(res) => saveRoutes({ [res.field]: res.value })}
-                                      onBlur={() => setEditing(null)}
-                                    />,
-                                    document.body
-                                  )}
+                                {createPortal(
+                                  <AnimatePresence>
+                                    {editing?.isDuration &&
+                                      isEditing(route?.routeId, route?.id) && (
+                                        <EditableCell
+                                          duration={route.duration}
+                                          style={{
+                                            top: pos.y,
+                                            left: pos.x,
+                                            width: pos.w,
+                                          }}
+                                          onChange={(res) =>
+                                            saveRoutes({
+                                              [res.field]: res.value,
+                                            })
+                                          }
+                                          onBlur={(e) => closeHandler(e)}
+                                        />
+                                      )}
+                                  </AnimatePresence>,
+                                  document.body
+                                )}
                               </>
                             ) : (
                               <span className="text-gray-400">—</span>
